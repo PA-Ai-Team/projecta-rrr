@@ -15,8 +15,49 @@ Initialize a new project through unified flow: questioning → research (optiona
 
 This is the most leveraged moment in any project. Deep questioning here means better plans, better execution, better outcomes. One command takes you from idea to ready-for-planning.
 
+## Projecta Preferred Pack
+
+**Source of Truth:** `projecta.defaults.json` at repo root.
+
+**Core Stack (always assumed):**
+- Framework: Next.js (App Router)
+- Language: TypeScript
+- Package Manager: npm only
+- UI: Tailwind CSS + shadcn/ui
+- Unit Tests: Vitest + Testing Library
+- E2E Tests: Playwright
+
+**Preferred Providers (defaults, overrideable with reason):**
+- Database: Neon
+- Auth: Clerk (default), Neon Auth (alternative)
+- Payments: Stripe
+- Object Storage: Cloudflare R2
+- Analytics: PostHog
+- Voice: Deepgram
+- Deploy: Render
+
+**Agent Stack (when agents needed):**
+- Orchestration: Mastra
+- Agent Auth: Auth.dev
+- Agent Mail: Agentmail
+- Sandbox: E2B
+- Browser Automation: Browserbase
+
+**Discouraged (allowed with explicit reason):**
+- Firebase, Supabase, Auth0, Vercel, PlanetScale
+
+**Override Rules:**
+- Defaults are recommended, NOT mandatory.
+- If user wants to override any default, they must explicitly say so and provide a reason.
+- All overrides are recorded in "Deviation Notes" section of PROJECT.md.
+
+**Greenfield vs Brownfield:**
+- GREENFIELD (empty folder): Runs `/rrr:bootstrap-nextjs` logic first, then questionnaire.
+- BROWNFIELD (existing code): Skips bootstrap entirely, only creates `.planning/` artifacts. Does NOT run create-next-app, does NOT overwrite files.
+
 **Creates:**
-- `.planning/PROJECT.md` — project context
+- `.planning/PROJECT.md` — project context (includes Deviation Notes)
+- `.planning/MVP_FEATURES.yml` — capability selections per project
 - `.planning/config.json` — workflow preferences
 - `.planning/research/` — domain research (optional)
 - `.planning/REQUIREMENTS.md` — scoped requirements
@@ -30,25 +71,222 @@ This is the most leveraged moment in any project. Deep questioning here means be
 
 <execution_context>
 
-@~/.claude/rrr/references/questioning.md
-@~/.claude/rrr/references/ui-brand.md
-@~/.claude/rrr/templates/project.md
-@~/.claude/rrr/templates/requirements.md
+@./.claude/rrr/references/questioning.md
+@./.claude/rrr/references/ui-brand.md
+@./.claude/rrr/templates/project.md
+@./.claude/rrr/templates/requirements.md
 
 </execution_context>
 
 <process>
 
-## Phase 1: Setup
+## Preflight: Greenfield vs Brownfield Safety
 
-**MANDATORY FIRST STEP — Execute these checks before ANY user interaction:**
+**MANDATORY FIRST STEP — Run these checks before ANY user interaction or modification:**
 
-1. **Abort if project exists:**
+Display initial banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RRR ► NEW PROJECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Step 1: Preflight Shell Checks
+
+Run these commands to detect repo state (use Bash tool):
+
+```bash
+# Preflight detection
+echo "=== PREFLIGHT CHECK ==="
+
+# Check for existing files/dirs
+ls -la 2>/dev/null | head -20
+
+# Check package.json
+test -f package.json && echo "HAS_PACKAGE_JSON=yes" && cat package.json | head -10 || echo "HAS_PACKAGE_JSON=no"
+
+# Check app directories
+test -d app && echo "HAS_APP_DIR=yes" && ls app | head -5 || echo "HAS_APP_DIR=no"
+test -d src && echo "HAS_SRC_DIR=yes" && ls src | head -5 || echo "HAS_SRC_DIR=no"
+
+# Check next.config
+ls next.config.* 2>/dev/null && echo "HAS_NEXT_CONFIG=yes" || echo "HAS_NEXT_CONFIG=no"
+
+# Check git state
+git rev-parse --is-inside-work-tree 2>/dev/null && git log -1 --oneline 2>/dev/null && echo "HAS_GIT_COMMITS=yes" || echo "HAS_GIT_COMMITS=no"
+
+# Check RRR state
+test -f .planning/STATE.md && echo "HAS_RRR_STATE=yes" || echo "HAS_RRR_STATE=no"
+test -f .planning/PROJECT.md && echo "HAS_RRR_PROJECT=yes" || echo "HAS_RRR_PROJECT=no"
+
+echo "=== END PREFLIGHT ==="
+```
+
+### Step 2: Classify Repo Mode
+
+Based on preflight results, classify as:
+
+**BROWNFIELD** if ANY of these are true:
+- `HAS_PACKAGE_JSON=yes`
+- `HAS_APP_DIR=yes`
+- `HAS_SRC_DIR=yes`
+- `HAS_NEXT_CONFIG=yes`
+- `HAS_GIT_COMMITS=yes`
+- `HAS_RRR_STATE=yes`
+
+**GREENFIELD** if ALL are false (empty directory).
+
+### Step 3: Handle Based on Mode
+
+**If `HAS_RRR_STATE=yes` (RRR already initialized):**
+
+Display and EXIT:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RRR project already initialized
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This repo has .planning/STATE.md — RRR is already set up.
+
+To resume work: /rrr:progress
+To check status: /rrr:resume-work
+```
+
+Stop here. Do NOT proceed.
+
+---
+
+**If `HAS_RRR_PROJECT=yes` but `HAS_RRR_STATE=no`:**
+
+Project was partially initialized. Continue to Phase 1 to complete setup.
+
+---
+
+**If BROWNFIELD (existing code, no RRR):**
+
+Display:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BROWNFIELD MODE — Existing repo detected
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Detected existing code. RRR will:
+✓ Add .planning/ directory for project management
+✓ Keep all existing files untouched
+✗ Skip bootstrap (no create-next-app, no restructuring)
+
+Starting RRR questionnaire...
+```
+
+**BROWNFIELD RULES:**
+- Do NOT run `create-next-app`
+- Do NOT overwrite or restructure existing files
+- Do NOT reinstall Tailwind/shadcn/Vitest/Playwright
+- ONLY create `.planning/` artifacts
+- Proceed directly to Phase 1 (Setup)
+
+Continue to Phase 1.
+
+---
+
+**If GREENFIELD (empty directory):**
+
+Display:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GREENFIELD MODE — Empty directory
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bootstrapping with Projecta defaults...
+(Next.js + TypeScript + Tailwind + shadcn/ui + Vitest + Playwright)
+```
+
+Run `/rrr:bootstrap-nextjs` logic:
+
+a. **Initialize git:**
    ```bash
-   [ -f .planning/PROJECT.md ] && echo "ERROR: Project already initialized. Use /rrr:progress" && exit 1
+   git init
    ```
 
-2. **Initialize git repo in THIS directory** (required even if inside a parent repo):
+b. **Create Next.js app:**
+   ```bash
+   npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm --no-turbopack
+   ```
+
+c. **Initialize shadcn/ui and add Button:**
+   ```bash
+   npx shadcn@latest init -d
+   npx shadcn@latest add button -y
+   ```
+
+d. **Update homepage** — Edit `src/app/page.tsx`:
+   ```tsx
+   import { Button } from "@/components/ui/button";
+
+   export default function Home() {
+     return (
+       <main className="flex min-h-screen flex-col items-center justify-center p-24">
+         <div className="text-center space-y-6">
+           <h1 className="text-4xl font-bold">Welcome to Your MVP</h1>
+           <p className="text-muted-foreground">
+             Built with Next.js, TypeScript, Tailwind, and shadcn/ui
+           </p>
+           <Button size="lg">Get Started</Button>
+         </div>
+       </main>
+     );
+   }
+   ```
+
+e. **Install Vitest + Testing Library:**
+   ```bash
+   npm install -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event
+   ```
+
+f. **Create vitest.config.ts** and **src/test/setup.ts** and **src/app/page.test.tsx** (see `/rrr:bootstrap-nextjs` for full content)
+
+g. **Add test scripts to package.json:** `"test": "vitest run"`, `"test:watch": "vitest"`
+
+h. **Install Playwright:**
+   ```bash
+   npm install -D @playwright/test
+   npx playwright install chromium
+   ```
+
+i. **Create playwright.config.ts** and **e2e/home.spec.ts** (see `/rrr:bootstrap-nextjs` for full content)
+
+j. **Add e2e scripts to package.json:** `"e2e": "playwright test"`, `"e2e:ui": "playwright test --ui"`
+
+k. **Create .env.example** with MVP placeholders
+
+l. **Run tests:**
+   ```bash
+   npm test
+   npm run e2e
+   ```
+
+m. **Commit bootstrap:**
+   ```bash
+   git add -A
+   git commit -m "chore: bootstrap nextjs mvp"
+   ```
+
+Display:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BOOTSTRAP COMPLETE ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Starting RRR questionnaire...
+```
+
+Continue to Phase 1.
+
+## Phase 1: Setup
+
+**Execute these checks:**
+
+1. **Initialize git repo in THIS directory** (required even if inside a parent repo):
    ```bash
    if [ -d .git ] || [ -f .git ]; then
        echo "Git repo exists in current directory"
@@ -58,7 +296,7 @@ This is the most leveraged moment in any project. Deep questioning here means be
    fi
    ```
 
-3. **Detect existing code (brownfield detection):**
+2. **Detect existing code (brownfield detection):**
    ```bash
    CODE_FILES=$(find . -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.swift" -o -name "*.java" 2>/dev/null | grep -v node_modules | grep -v .git | head -20)
    HAS_PACKAGE=$([ -f package.json ] || [ -f requirements.txt ] || [ -f Cargo.toml ] || [ -f go.mod ] || [ -f Package.swift ] && echo "yes")
@@ -90,7 +328,177 @@ Exit command.
 
 **If "Skip mapping":** Continue to Phase 3.
 
-**If no existing code detected OR codebase already mapped:** Continue to Phase 3.
+**If no existing code detected OR codebase already mapped:** Continue to Phase 2.5.
+
+## Phase 2.5: Capability Selection (MVP_FEATURES.yml)
+
+**This phase generates `.planning/MVP_FEATURES.yml` based on capability needs.**
+
+Display:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RRR ► CAPABILITY SELECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Using Projecta Preferred Pack defaults.
+Overrides allowed with explicit reason.
+```
+
+### Step 1: Preset Quick-Start (Optional)
+
+Use AskUserQuestion:
+- header: "Preset"
+- question: "Start with a use-case preset? This pre-configures capabilities."
+- options:
+  - "landing-waitlist" — Landing page + email capture (no auth, no db)
+  - "saas-dashboard" — SaaS with Clerk + Neon + optional Stripe
+  - "api-admin" — API backend + admin panel (Neon, optional auth)
+  - "voice-agent" — Voice AI agent (Deepgram + full agent stack)
+  - "None" — Configure capabilities manually (Recommended for custom)
+
+**If preset selected:** Load preset defaults, skip to Step 3 (confirm/override).
+
+**If "None":** Continue to Step 2.
+
+### Step 2: Capability Questionnaire
+
+Ask these questions using AskUserQuestion (can batch into 2-3 calls):
+
+**Authentication:**
+- header: "Auth"
+- question: "Is user login needed?"
+- options:
+  - "Yes, use Clerk (Recommended)" — Clerk for auth
+  - "Yes, use Neon Auth" — Neon's built-in auth
+  - "Yes, other" — Specify provider (requires reason)
+  - "No auth needed" — Skip authentication
+
+**Database:**
+- header: "Database"
+- question: "Is a database needed?"
+- options:
+  - "Yes, use Neon (Recommended)" — Neon PostgreSQL
+  - "Yes, other" — Specify provider (requires reason)
+  - "No database needed" — Skip database
+
+**Payments:**
+- header: "Payments"
+- question: "Are payments needed?"
+- options:
+  - "Yes, use Stripe (Recommended)" — Stripe for payments
+  - "Yes, other" — Specify provider (requires reason)
+  - "No payments needed" — Skip payments
+
+**Storage & Analytics:**
+- header: "Storage"
+- question: "Are file uploads/media needed?"
+- options:
+  - "Yes, use R2 (Recommended)" — Cloudflare R2
+  - "Yes, other" — Specify provider (requires reason)
+  - "No storage needed" — Skip object storage
+
+- header: "Analytics"
+- question: "Is analytics needed?"
+- options:
+  - "Yes, use PostHog (Recommended)" — PostHog analytics
+  - "Yes, other" — Specify provider (requires reason)
+  - "No analytics needed" — Skip analytics
+
+**Voice:**
+- header: "Voice"
+- question: "Is voice/speech needed?"
+- options:
+  - "Yes, use Deepgram (Recommended)" — Deepgram STT/TTS
+  - "Yes, other" — Specify provider (requires reason)
+  - "No voice needed" — Skip voice
+
+**Agents:**
+- header: "Agents"
+- question: "Are AI agents needed?"
+- options:
+  - "Yes, full agent stack (Recommended)" — Mastra + Auth.dev + Agentmail + E2B + Browserbase
+  - "Yes, minimal" — Just Mastra orchestration
+  - "Yes, custom" — Specify stack (requires reason)
+  - "No agents needed" — Skip agent stack
+
+**Deployment:**
+- header: "Deploy"
+- question: "Deploy target?"
+- options:
+  - "Render (Recommended)" — Deploy to Render
+  - "Other" — Specify platform (requires reason)
+  - "Not yet" — Skip deployment setup
+
+### Step 3: Collect Override Reasons
+
+**If user selected "other" for any capability OR selected a discouraged provider:**
+
+Ask inline: "You chose [provider] instead of the default [default]. What's the reason for this choice?"
+
+Record each override with:
+- capability: what changed
+- default: Preferred Pack value
+- chosen: user's choice
+- reason: user's explanation
+
+### Step 4: Generate MVP_FEATURES.yml
+
+Write `.planning/MVP_FEATURES.yml`:
+
+```yaml
+# Generated by /rrr:new-project
+# Source: Projecta Preferred Pack with user selections
+
+features:
+  auth: [clerk | neon-auth | none | other]
+  db: [neon | none | other]
+  deploy: [render | none | other]
+  payments: [stripe | none | other]
+  object_storage: [r2 | none | other]
+  analytics: [posthog | none | other]
+  voice: [deepgram | none | other]
+
+agent_stack:
+  enabled: [true | false]
+  orchestration: [mastra | none | other]
+  agent_auth: [authdev | none | other]
+  agent_mail: [agentmail | none | other]
+  sandbox: [e2b | none | other]
+  browser_automation: [browserbase | none | other]
+
+# Deviation Notes (if any overrides from Preferred Pack)
+deviations:
+  # - capability: auth
+  #   default: clerk
+  #   chosen: auth0
+  #   reason: "Client requires Auth0 for SSO compliance"
+```
+
+### Step 5: Display Summary
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ MVP FEATURES CONFIGURED ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Features:
+  Auth: [value]
+  Database: [value]
+  Payments: [value]
+  Storage: [value]
+  Analytics: [value]
+  Voice: [value]
+
+Agent Stack: [enabled/disabled]
+  [if enabled, list components]
+
+Deviations: [count or "None"]
+
+File: .planning/MVP_FEATURES.yml
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Continue to Phase 3.
 
 ## Phase 3: Deep Questioning
 
@@ -213,6 +621,24 @@ Initialize with any decisions made during questioning:
 |----------|-----------|---------|
 | [Choice from questioning] | [Why] | — Pending |
 ```
+
+**Deviation Notes (from Preferred Pack):**
+
+Include any overrides from the capability selection phase:
+
+```markdown
+## Deviation Notes
+
+Overrides from Projecta Preferred Pack (`projecta.defaults.json`):
+
+| Capability | Default | Chosen | Reason |
+|------------|---------|--------|--------|
+| [capability] | [preferred pack default] | [user's choice] | [user's reason] |
+
+_If no deviations: "None — using all Preferred Pack defaults."_
+```
+
+Read deviations from `.planning/MVP_FEATURES.yml` deviations section and format as table.
 
 **Last updated footer:**
 
@@ -367,7 +793,7 @@ Your STACK.md feeds into roadmap creation. Be prescriptive:
 
 <output>
 Write to: .planning/research/STACK.md
-Use template: ~/.claude/rrr/templates/research-project/STACK.md
+Use template: ./.claude/rrr/templates/research-project/STACK.md
 </output>
 ", subagent_type="rrr-project-researcher", description="Stack research")
 
@@ -406,7 +832,7 @@ Your FEATURES.md feeds into requirements definition. Categorize clearly:
 
 <output>
 Write to: .planning/research/FEATURES.md
-Use template: ~/.claude/rrr/templates/research-project/FEATURES.md
+Use template: ./.claude/rrr/templates/research-project/FEATURES.md
 </output>
 ", subagent_type="rrr-project-researcher", description="Features research")
 
@@ -445,7 +871,7 @@ Your ARCHITECTURE.md informs phase structure in roadmap. Include:
 
 <output>
 Write to: .planning/research/ARCHITECTURE.md
-Use template: ~/.claude/rrr/templates/research-project/ARCHITECTURE.md
+Use template: ./.claude/rrr/templates/research-project/ARCHITECTURE.md
 </output>
 ", subagent_type="rrr-project-researcher", description="Architecture research")
 
@@ -484,7 +910,7 @@ Your PITFALLS.md prevents mistakes in roadmap/planning. For each pitfall:
 
 <output>
 Write to: .planning/research/PITFALLS.md
-Use template: ~/.claude/rrr/templates/research-project/PITFALLS.md
+Use template: ./.claude/rrr/templates/research-project/PITFALLS.md
 </output>
 ", subagent_type="rrr-project-researcher", description="Pitfalls research")
 ```
@@ -507,7 +933,7 @@ Read these files:
 
 <output>
 Write to: .planning/research/SUMMARY.md
-Use template: ~/.claude/rrr/templates/research-project/SUMMARY.md
+Use template: ./.claude/rrr/templates/research-project/SUMMARY.md
 Commit after writing.
 </output>
 ", subagent_type="rrr-research-synthesizer", description="Synthesize research")
@@ -853,7 +1279,8 @@ Present completion with next steps:
 
 <output>
 
-- `.planning/PROJECT.md`
+- `.planning/PROJECT.md` (includes Deviation Notes)
+- `.planning/MVP_FEATURES.yml` (capability selections)
 - `.planning/config.json`
 - `.planning/research/` (if research selected)
   - `STACK.md`
@@ -870,11 +1297,18 @@ Present completion with next steps:
 
 <success_criteria>
 
+- [ ] Preflight checks completed (greenfield vs brownfield detection)
+- [ ] If RRR already initialized (.planning/STATE.md): User directed to /rrr:progress and command exits
+- [ ] If GREENFIELD: Bootstrap completed (Next.js + Tailwind + shadcn/ui + Vitest + Playwright), tests pass, committed
+- [ ] If BROWNFIELD: Existing files untouched, only .planning/ artifacts created
 - [ ] .planning/ directory created
 - [ ] Git repo initialized
-- [ ] Brownfield detection completed
+- [ ] Brownfield codebase mapping offered (if existing code detected)
+- [ ] Capability questionnaire completed (auth, db, payments, storage, analytics, voice, agents, deploy)
+- [ ] MVP_FEATURES.yml created with capability selections
+- [ ] Deviation Notes collected for any overrides from Preferred Pack
 - [ ] Deep questioning completed (threads followed, not rushed)
-- [ ] PROJECT.md captures full context → **committed**
+- [ ] PROJECT.md captures full context + Deviation Notes → **committed**
 - [ ] config.json has workflow mode, depth, parallelization → **committed**
 - [ ] Research completed (if selected) — 4 parallel agents spawned → **committed**
 - [ ] Requirements gathered (from research or conversation)

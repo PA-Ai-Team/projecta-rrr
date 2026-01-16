@@ -1,0 +1,32 @@
+{
+  "framework": "nextjs-app-router",
+  "language": "typescript",
+  "packageManager": "npm",
+  "ui": {
+    "styling": "tailwind",
+    "componentSystem": "shadcn-ui"
+  },
+  "testing": {
+    "unit": "vitest",
+    "e2e": "playwright"
+  },
+  "preferredProviders": {
+    "db": ["neon"],
+    "auth": ["clerk", "neon-auth"],
+    "authDefault": "clerk",
+    "deploy": ["render"],
+    "payments": ["stripe"],
+    "objectStorage": ["r2"],
+    "analytics": ["posthog"],
+    "voice": ["deepgram"],
+    "agents": ["mastra"],
+    "agentAuth": ["authdev"],
+    "agentMail": ["agentmail"],
+    "sandbox": ["e2b"],
+    "browserAutomation": ["browserbase"]
+  },
+  "discouragedProviders": {
+    "list": ["firebase", "supabase", "auth0", "vercel", "planetscale"],
+    "note": "These providers are discouraged but allowed with explicit reason recorded in Deviation Notes"
+  }
+}

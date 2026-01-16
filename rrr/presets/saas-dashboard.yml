@@ -1,0 +1,79 @@
+# SaaS Dashboard Preset
+# Auth + database required, payments optional
+
+name: saas-dashboard
+description: SaaS application with authentication, database, and optional payments
+
+stack:
+  framework: nextjs-app-router
+  language: typescript
+  package_manager: npm
+  ui: tailwind-shadcn
+  testing:
+    unit: vitest
+    e2e: playwright
+
+features:
+  core:
+    - User authentication (sign up, sign in, sign out)
+    - Protected dashboard route
+    - User profile management
+    - Database-backed data storage
+
+  optional:
+    - Subscription/billing management (Stripe)
+    - Team/organization support
+    - Settings page
+    - Usage analytics
+    - Notification system
+
+integrations:
+  required:
+    - clerk  # Authentication
+    - neon   # PostgreSQL database
+  optional:
+    - stripe  # Payments/subscriptions
+
+env_vars:
+  required:
+    - DATABASE_URL
+    - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    - CLERK_SECRET_KEY
+  optional:
+    - STRIPE_SECRET_KEY
+    - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    - STRIPE_WEBHOOK_SECRET
+
+pages:
+  - path: /
+    name: Landing/Marketing
+    auth: public
+  - path: /sign-in
+    name: Sign In
+    auth: public
+  - path: /sign-up
+    name: Sign Up
+    auth: public
+  - path: /dashboard
+    name: Dashboard
+    auth: protected
+  - path: /settings
+    name: Settings
+    auth: protected
+  - path: /billing
+    name: Billing (optional)
+    auth: protected
+
+database:
+  orm: drizzle
+  tables:
+    - users (synced from Clerk)
+    - user_data (application-specific)
+
+done_criteria:
+  - User can sign up and sign in
+  - Dashboard only accessible when authenticated
+  - User data persists to database
+  - Sign out works correctly
+  - Unit tests pass
+  - E2E test confirms auth flow

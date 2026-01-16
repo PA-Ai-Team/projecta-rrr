@@ -1,0 +1,55 @@
+# Landing + Waitlist Preset
+# No auth, no database, no payments - just a landing page with email capture
+
+name: landing-waitlist
+description: Landing page with email waitlist capture
+
+stack:
+  framework: nextjs-app-router
+  language: typescript
+  package_manager: npm
+  ui: tailwind-shadcn
+  testing:
+    unit: vitest
+    e2e: playwright
+
+features:
+  core:
+    - Hero section with value proposition
+    - Email capture form
+    - Thank you / confirmation state
+    - Mobile-responsive layout
+
+  optional:
+    - Social proof section (testimonials, logos)
+    - Feature highlights section
+    - FAQ accordion
+    - Footer with links
+
+integrations:
+  required: []
+  optional:
+    - resend  # For sending confirmation emails
+    - google-analytics  # For tracking
+
+env_vars:
+  required: []
+  optional:
+    - RESEND_API_KEY
+    - NEXT_PUBLIC_GA_ID
+
+pages:
+  - path: /
+    name: Landing Page
+    components:
+      - Hero
+      - EmailCapture
+      - Features (optional)
+      - Footer
+
+done_criteria:
+  - Landing page renders with hero and email form
+  - Email form submits and shows confirmation
+  - Page is mobile-responsive
+  - Unit tests pass
+  - E2E test confirms form submission flow

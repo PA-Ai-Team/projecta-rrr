@@ -1,0 +1,77 @@
+# Voice Agent Preset
+# Deepgram for speech, AI agent capabilities
+
+name: voice-agent
+description: Voice-enabled AI agent with speech-to-text and text-to-speech
+
+stack:
+  framework: nextjs-app-router
+  language: typescript
+  package_manager: npm
+  ui: tailwind-shadcn
+  testing:
+    unit: vitest
+    e2e: playwright
+
+features:
+  core:
+    - Real-time speech-to-text (Deepgram)
+    - Text-to-speech response
+    - Conversation interface
+    - Audio recording/playback
+
+  optional:
+    - Conversation history persistence
+    - Multiple voice options
+    - Interruption handling
+    - Agent personality configuration
+    - Function calling / tool use
+    - WebSocket for real-time streaming
+
+integrations:
+  required:
+    - deepgram  # Speech-to-text and text-to-speech
+  optional:
+    - anthropic  # Claude for agent responses
+    - openai     # Alternative LLM
+    - neon       # For conversation persistence
+
+env_vars:
+  required:
+    - DEEPGRAM_API_KEY
+  optional:
+    - ANTHROPIC_API_KEY
+    - OPENAI_API_KEY
+    - DATABASE_URL
+
+pages:
+  - path: /
+    name: Voice Agent Interface
+    components:
+      - AudioRecorder
+      - ConversationDisplay
+      - VoiceControls
+
+api_routes:
+  - path: /api/transcribe
+    methods: [POST]
+    description: Send audio, receive transcription
+  - path: /api/speak
+    methods: [POST]
+    description: Send text, receive audio
+  - path: /api/chat
+    methods: [POST]
+    description: Send message, receive agent response
+
+browser_support:
+  - Chrome (full support)
+  - Safari (limited WebRTC)
+  - Firefox (full support)
+
+done_criteria:
+  - User can speak and see transcription
+  - Agent responds with audio playback
+  - Conversation flows naturally
+  - Audio permissions handled correctly
+  - Unit tests pass
+  - E2E test confirms basic voice interaction

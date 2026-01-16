@@ -1,0 +1,73 @@
+# API + Admin Preset
+# Database required, auth optional for admin access
+
+name: api-admin
+description: API backend with admin dashboard for data management
+
+stack:
+  framework: nextjs-app-router
+  language: typescript
+  package_manager: npm
+  ui: tailwind-shadcn
+  testing:
+    unit: vitest
+    e2e: playwright
+
+features:
+  core:
+    - RESTful API routes (/api/*)
+    - Admin dashboard for CRUD operations
+    - Database schema with migrations
+    - Data validation (Zod)
+
+  optional:
+    - Admin authentication
+    - API key authentication for external access
+    - Rate limiting
+    - Audit logging
+    - Data export (CSV, JSON)
+    - Bulk operations
+
+integrations:
+  required:
+    - neon  # PostgreSQL database
+  optional:
+    - clerk  # Admin authentication
+
+env_vars:
+  required:
+    - DATABASE_URL
+  optional:
+    - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    - CLERK_SECRET_KEY
+    - API_SECRET_KEY
+
+pages:
+  - path: /admin
+    name: Admin Dashboard
+    auth: optional
+  - path: /admin/[resource]
+    name: Resource List
+    auth: optional
+  - path: /admin/[resource]/[id]
+    name: Resource Detail
+    auth: optional
+
+api_routes:
+  - path: /api/[resource]
+    methods: [GET, POST]
+  - path: /api/[resource]/[id]
+    methods: [GET, PUT, DELETE]
+
+database:
+  orm: drizzle
+  tables:
+    - Define based on requirements
+
+done_criteria:
+  - API endpoints return correct responses
+  - Admin can list, create, update, delete records
+  - Data validates correctly (rejects invalid input)
+  - Database migrations run successfully
+  - Unit tests pass
+  - E2E test confirms CRUD operations

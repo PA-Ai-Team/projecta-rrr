@@ -50,7 +50,10 @@ npx projecta-rrr@latest
 **`/rrr:new-project`**
 Initialize new project through unified flow.
 
-One command takes you from idea to ready-for-planning:
+**Automatically bootstraps if needed** — detects if repo is a Next.js project. If not, runs the bootstrap sequence (Next.js + TypeScript + Tailwind + shadcn/ui + Vitest + Playwright) before proceeding.
+
+One command takes you from empty folder to ready-for-planning:
+- Bootstrap detection and execution (if needed)
 - Deep questioning to understand what you're building
 - Optional domain research (spawns 4 parallel researcher agents)
 - Requirements definition with v1/v2/out-of-scope scoping
@@ -65,6 +68,20 @@ Creates all `.planning/` artifacts:
 - `STATE.md` — project memory
 
 Usage: `/rrr:new-project`
+
+**`/rrr:bootstrap-nextjs`**
+Scaffold Next.js App Router project with Projecta defaults (standalone).
+
+- Next.js (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui (with Button component)
+- Vitest + Testing Library (smoke unit test)
+- Playwright (smoke e2e test)
+- `.env.example` with common MVP placeholders
+
+Use this standalone when you only want the bootstrap without RRR planning.
+Note: `/rrr:new-project` includes bootstrap automatically.
+
+Usage: `/rrr:bootstrap-nextjs`
 
 **`/rrr:map-codebase`**
 Map an existing codebase for brownfield projects.
@@ -352,14 +369,22 @@ Change anytime by editing `.planning/config.json`
 
 ## Common Workflows
 
-**Starting a new project:**
+**Starting a new project (from empty folder):**
 
 ```
-/rrr:new-project        # Unified flow: questioning → research → requirements → roadmap
+/rrr:new-project        # Bootstraps repo (if needed) → questionnaire → requirements → roadmap
 /clear
 /rrr:plan-phase 1       # Create plans for first phase
 /clear
 /rrr:execute-phase 1    # Execute all plans in phase
+```
+
+That's it! `/rrr:new-project` handles everything from bootstrap to roadmap.
+
+**Bootstrap only (no planning):**
+
+```
+/rrr:bootstrap-nextjs   # Just scaffold Next.js + testing + shadcn
 ```
 
 **Resuming work after a break:**

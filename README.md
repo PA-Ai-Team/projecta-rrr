@@ -164,6 +164,63 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 
 ---
 
+## Projecta Preferred Pack
+
+RRR includes a default stack optimized for rapid MVP development. Defaults are recommended but overrideable.
+
+### Where Defaults Live
+
+| File | Purpose |
+|------|---------|
+| `projecta.defaults.json` | Global defaults (core stack, preferred providers, discouraged list) |
+| `.planning/MVP_FEATURES.yml` | Per-project capability selections |
+| `.planning/PROJECT.md` | Deviation Notes (any overrides from defaults) |
+
+### Core Stack (always assumed)
+
+- **Framework:** Next.js (App Router) + TypeScript
+- **Package Manager:** npm
+- **UI:** Tailwind CSS + shadcn/ui
+- **Testing:** Vitest (unit) + Playwright (e2e)
+
+### Preferred Providers
+
+| Capability | Default | Alternative |
+|------------|---------|-------------|
+| Database | Neon | — |
+| Auth | Clerk | Neon Auth |
+| Payments | Stripe | — |
+| Object Storage | Cloudflare R2 | — |
+| Analytics | PostHog | — |
+| Voice | Deepgram | — |
+| Deploy | Render | — |
+
+### Agent Stack (when agents needed)
+
+- **Orchestration:** Mastra
+- **Agent Auth:** Auth.dev
+- **Agent Mail:** Agentmail
+- **Sandbox:** E2B
+- **Browser Automation:** Browserbase
+
+### Overrides
+
+If you choose a non-default provider, RRR asks for a reason and records it in Deviation Notes:
+
+```markdown
+## Deviation Notes
+
+| Capability | Default | Chosen | Reason |
+|------------|---------|--------|--------|
+| auth | clerk | auth0 | Client requires Auth0 for SSO compliance |
+```
+
+### Discouraged Providers
+
+These are allowed but require explicit justification: Firebase, Supabase, Auth0, Vercel, PlanetScale.
+
+---
+
 ## How It Works
 
 ### 1. Initialize Project (~10 minutes)
