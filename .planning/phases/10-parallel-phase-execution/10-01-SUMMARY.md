@@ -20,7 +20,7 @@ tech-stack:
 
 key-files:
   created: []
-  modified: [get-shit-done/workflows/execute-plan.md, commands/gsd/execute-plan.md, commands/gsd/plan-fix.md, commands/gsd/resume-task.md, get-shit-done/workflows/plan-phase.md, get-shit-done/templates/phase-prompt.md, get-shit-done/templates/summary.md, get-shit-done/templates/agent-history.md, get-shit-done/templates/codebase/structure.md]
+  modified: [rrr/workflows/execute-plan.md, commands/rrr/execute-plan.md, commands/rrr/plan-fix.md, commands/rrr/resume-task.md, rrr/workflows/plan-phase.md, rrr/templates/phase-prompt.md, rrr/templates/summary.md, rrr/templates/agent-history.md, rrr/templates/codebase/structure.md]
 
 key-decisions:
   - "git mv preserves history"
@@ -66,15 +66,15 @@ Each task was committed atomically:
 **Plan metadata:** `81cbd29` (docs: complete plan)
 
 ## Files Created/Modified
-- `get-shit-done/workflows/execute-plan.md` - Renamed from execute-phase.md
-- `commands/gsd/execute-plan.md` - Updated workflow reference and process text
-- `commands/gsd/plan-fix.md` - Updated execution_context reference
-- `commands/gsd/resume-task.md` - Updated infrastructure mention
-- `get-shit-done/workflows/plan-phase.md` - Updated execution context reference
-- `get-shit-done/templates/phase-prompt.md` - Updated 2 path occurrences
-- `get-shit-done/templates/summary.md` - Updated 3 workflow mentions
-- `get-shit-done/templates/agent-history.md` - Updated 2 workflow mentions
-- `get-shit-done/templates/codebase/structure.md` - Updated example workflow name
+- `rrr/workflows/execute-plan.md` - Renamed from execute-phase.md
+- `commands/rrr/execute-plan.md` - Updated workflow reference and process text
+- `commands/rrr/plan-fix.md` - Updated execution_context reference
+- `commands/rrr/resume-task.md` - Updated infrastructure mention
+- `rrr/workflows/plan-phase.md` - Updated execution context reference
+- `rrr/templates/phase-prompt.md` - Updated 2 path occurrences
+- `rrr/templates/summary.md` - Updated 3 workflow mentions
+- `rrr/templates/agent-history.md` - Updated 2 workflow mentions
+- `rrr/templates/codebase/structure.md` - Updated example workflow name
 
 ## Decisions Made
 - Used git mv for rename to preserve file history

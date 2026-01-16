@@ -25,7 +25,7 @@ tech-stack:
 
 key-files:
   created: []
-  modified: [get-shit-done/templates/agent-history.md]
+  modified: [rrr/templates/agent-history.md]
 
 key-decisions:
   - "Version bump to 1.2 for parallel fields"
@@ -72,7 +72,7 @@ completed: 2026-01-12
 
 ## Files Created/Modified
 
-- `get-shit-done/templates/agent-history.md` - Extended with v1.2 schema, parallel fields, examples, resume docs
+- `rrr/templates/agent-history.md` - Extended with v1.2 schema, parallel fields, examples, resume docs
 
 ## Decisions Made
 
@@ -93,16 +93,16 @@ None
 All 4 plans executed:
 - 10-01: Renamed execute-phase → execute-plan workflow
 - 10-02: Created parallel execution workflow (execute-phase.md)
-- 10-03: Created /gsd:execute-phase command + parallelization config
+- 10-03: Created /rrr:execute-phase command + parallelization config
 - 10-04: Extended agent-history schema to v1.2
 
-Parallel phase execution now available via `/gsd:execute-phase`.
+Parallel phase execution now available via `/rrr:execute-phase`.
 
 ## Next Phase Readiness
 
 - Phase 10 complete
 - Milestone complete - all 10 phases finished
-- Ready for `/gsd:complete-milestone`
+- Ready for `/rrr:complete-milestone`
 
 ---
 *Phase: 10-parallel-phase-execution*

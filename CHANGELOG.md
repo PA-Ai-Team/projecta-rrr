@@ -33,12 +33,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Consistent zero-padding for phase directories (01-name, not 1-name)
 - Plan file naming: `{phase}-{plan}-PLAN.md` pattern restored across all agents
 - Double-path bug in researcher git add command
-- Removed `/gsd:research-phase` from next-step suggestions (use `/gsd:plan-phase` instead)
+- Removed `/rrr:research-phase` from next-step suggestions (use `/rrr:plan-phase` instead)
 
 ## [1.5.22] - 2025-01-16
 
 ### Added
-- Statusline update indicator — shows `⬆ /gsd:update` when a new version is available
+- Statusline update indicator — shows `⬆ /rrr:update` when a new version is available
 
 ### Fixed
 - Planner now updates ROADMAP.md placeholders after planning completes
@@ -50,9 +50,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Research synthesizer agent that consolidates parallel research into SUMMARY.md
 
 ### Changed
-- **Unified `/gsd:new-project` flow** — Single command now handles questions → research → requirements → roadmap (~10 min)
+- **Unified `/rrr:new-project` flow** — Single command now handles questions → research → requirements → roadmap (~10 min)
 - Simplified README to reflect streamlined workflow: new-project → plan-phase → execute-phase
-- Added optional `/gsd:discuss-phase` documentation for UI/UX/behavior decisions before planning
+- Added optional `/rrr:discuss-phase` documentation for UI/UX/behavior decisions before planning
 
 ### Fixed
 - verify-work now shows clear checkpoint box with action prompt ("Type 'pass' or describe what's wrong")
@@ -75,36 +75,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.5.19] - 2026-01-16
 
 ### Changed
-- `/gsd:discuss-phase` redesigned with intelligent gray area analysis — analyzes phase to identify discussable areas (UI, UX, Behavior, etc.), presents multi-select for user control, deep-dives each area with focused questioning
+- `/rrr:discuss-phase` redesigned with intelligent gray area analysis — analyzes phase to identify discussable areas (UI, UX, Behavior, etc.), presents multi-select for user control, deep-dives each area with focused questioning
 - Explicit scope guardrail prevents scope creep during discussion — captures deferred ideas without acting on them
 - CONTEXT.md template restructured for decisions (domain boundary, decisions by category, Claude's discretion, deferred ideas)
 - Downstream awareness: discuss-phase now explicitly documents that CONTEXT.md feeds researcher and planner agents
-- `/gsd:plan-phase` now integrates research — spawns `gsd-phase-researcher` before planning unless research exists or `--skip-research` flag used
+- `/rrr:plan-phase` now integrates research — spawns `rrr-phase-researcher` before planning unless research exists or `--skip-research` flag used
 
 ## [1.5.18] - 2026-01-16
 
 ### Added
 - **Plan verification loop** — Plans are now verified before execution with a planner → checker → revise cycle
-  - New `gsd-plan-checker` agent (744 lines) validates plans will achieve phase goals
+  - New `rrr-plan-checker` agent (744 lines) validates plans will achieve phase goals
   - Six verification dimensions: requirement coverage, task completeness, dependency correctness, key links, scope sanity, must_haves derivation
   - Max 3 revision iterations before user escalation
   - `--skip-verify` flag for experienced users who want to bypass verification
-- **Dedicated planner agent** — `gsd-planner` (1,319 lines) consolidates all planning expertise
+- **Dedicated planner agent** — `rrr-planner` (1,319 lines) consolidates all planning expertise
   - Complete methodology: discovery levels, task breakdown, dependency graphs, scope estimation, goal-backward analysis
   - Revision mode for handling checker feedback
   - TDD integration and checkpoint patterns
 - **Statusline integration** — Context usage, model, and current task display
 
 ### Changed
-- `/gsd:plan-phase` refactored to thin orchestrator pattern (310 lines)
-  - Spawns `gsd-planner` for planning, `gsd-plan-checker` for verification
+- `/rrr:plan-phase` refactored to thin orchestrator pattern (310 lines)
+  - Spawns `rrr-planner` for planning, `rrr-plan-checker` for verification
   - User sees status between agent spawns (not a black box)
-- Planning references deprecated with redirects to `gsd-planner` agent sections
+- Planning references deprecated with redirects to `rrr-planner` agent sections
   - `plan-format.md`, `scope-estimation.md`, `goal-backward.md`, `principles.md`
   - `workflows/plan-phase.md`
 
 ### Fixed
-- Removed zombie `gsd-milestone-auditor` agent (was accidentally re-added after correct deletion)
+- Removed zombie `rrr-milestone-auditor` agent (was accidentally re-added after correct deletion)
 
 ### Removed
 - Phase 99 throwaway test files
@@ -112,48 +112,48 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.5.17] - 2026-01-15
 
 ### Added
-- New `/gsd:update` command — check for updates, install, and display changelog of what changed (better UX than raw `npx get-shit-done-cc`)
+- New `/rrr:update` command — check for updates, install, and display changelog of what changed (better UX than raw `npx projecta-rrr`)
 
 ## [1.5.16] - 2026-01-15
 
 ### Added
-- New `gsd-researcher` agent (915 lines) with comprehensive research methodology, 4 research modes (ecosystem, feasibility, implementation, comparison), source hierarchy, and verification protocols
-- New `gsd-debugger` agent (990 lines) with scientific debugging methodology, hypothesis testing, and 7+ investigation techniques
-- New `gsd-codebase-mapper` agent for brownfield codebase analysis
+- New `rrr-researcher` agent (915 lines) with comprehensive research methodology, 4 research modes (ecosystem, feasibility, implementation, comparison), source hierarchy, and verification protocols
+- New `rrr-debugger` agent (990 lines) with scientific debugging methodology, hypothesis testing, and 7+ investigation techniques
+- New `rrr-codebase-mapper` agent for brownfield codebase analysis
 - Research subagent prompt template for context-only spawning
 
 ### Changed
-- `/gsd:research-phase` refactored to thin orchestrator — now injects rich context (key insight framing, downstream consumer info, quality gates) to gsd-researcher agent
-- `/gsd:research-project` refactored to spawn 4 parallel gsd-researcher agents with milestone-aware context (greenfield vs v1.1+) and roadmap implications guidance
-- `/gsd:debug` refactored to thin orchestrator (149 lines) — spawns gsd-debugger agent with full debugging expertise
-- `/gsd:new-milestone` now explicitly references MILESTONE-CONTEXT.md
+- `/rrr:research-phase` refactored to thin orchestrator — now injects rich context (key insight framing, downstream consumer info, quality gates) to rrr-researcher agent
+- `/rrr:research-project` refactored to spawn 4 parallel rrr-researcher agents with milestone-aware context (greenfield vs v1.1+) and roadmap implications guidance
+- `/rrr:debug` refactored to thin orchestrator (149 lines) — spawns rrr-debugger agent with full debugging expertise
+- `/rrr:new-milestone` now explicitly references MILESTONE-CONTEXT.md
 
 ### Deprecated
-- `workflows/research-phase.md` — consolidated into gsd-researcher agent
-- `workflows/research-project.md` — consolidated into gsd-researcher agent
-- `workflows/debug.md` — consolidated into gsd-debugger agent
-- `references/research-pitfalls.md` — consolidated into gsd-researcher agent
-- `references/debugging.md` — consolidated into gsd-debugger agent
-- `references/debug-investigation.md` — consolidated into gsd-debugger agent
+- `workflows/research-phase.md` — consolidated into rrr-researcher agent
+- `workflows/research-project.md` — consolidated into rrr-researcher agent
+- `workflows/debug.md` — consolidated into rrr-debugger agent
+- `references/research-pitfalls.md` — consolidated into rrr-researcher agent
+- `references/debugging.md` — consolidated into rrr-debugger agent
+- `references/debug-investigation.md` — consolidated into rrr-debugger agent
 
 ## [1.5.15] - 2025-01-15
 
 ### Fixed
-- **Agents now install correctly** — The `agents/` folder (gsd-executor, gsd-verifier, gsd-integration-checker, gsd-milestone-auditor) was missing from npm package, now included
+- **Agents now install correctly** — The `agents/` folder (rrr-executor, rrr-verifier, rrr-integration-checker, rrr-milestone-auditor) was missing from npm package, now included
 
 ### Changed
-- Consolidated `/gsd:plan-fix` into `/gsd:plan-phase --gaps` for simpler workflow
+- Consolidated `/rrr:plan-fix` into `/rrr:plan-phase --gaps` for simpler workflow
 - UAT file writes now batched instead of per-response for better performance
 
 ## [1.5.14] - 2025-01-15
 
 ### Fixed
-- Plan-phase now always routes to `/gsd:execute-phase` after planning, even for single-plan phases
+- Plan-phase now always routes to `/rrr:execute-phase` after planning, even for single-plan phases
 
 ## [1.5.13] - 2026-01-15
 
 ### Fixed
-- `/gsd:new-milestone` now presents research and requirements paths as equal options, matching `/gsd:new-project` format
+- `/rrr:new-milestone` now presents research and requirements paths as equal options, matching `/rrr:new-project` format
 
 ## [1.5.12] - 2025-01-15
 
@@ -168,7 +168,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - `MILESTONE-AUDIT.md` now versioned as `v{version}-MILESTONE-AUDIT.md` and archived on completion
-- `progress` now correctly routes to `/gsd:discuss-milestone` when between milestones (Route F)
+- `progress` now correctly routes to `/rrr:discuss-milestone` when between milestones (Route F)
 
 ## [1.5.11] - 2025-01-15
 
@@ -186,12 +186,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.5.9] - 2025-01-15
 
 ### Added
-- Milestone audit system (`/gsd:audit-milestone`) for verifying milestone completion with parallel verification agents
+- Milestone audit system (`/rrr:audit-milestone`) for verifying milestone completion with parallel verification agents
 
 ### Changed
 - Checkpoint display format improved with box headers and unmissable "→ YOUR ACTION:" prompts
 - Subagent colors updated (executor: yellow, integration-checker: blue)
-- Execute-phase now recommends `/gsd:audit-milestone` when milestone completes
+- Execute-phase now recommends `/rrr:audit-milestone` when milestone completes
 
 ### Fixed
 - Research-phase no longer gatekeeps by domain type
@@ -205,25 +205,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Verification loop: When gaps are found, verifier generates fix plans that execute automatically before re-verifying
 
 ### Changed
-- `gsd-executor` subagent color changed from red to blue
+- `rrr-executor` subagent color changed from red to blue
 
 ## [1.5.7] - 2025-01-15
 
 ### Added
-- `gsd-executor` subagent: Dedicated agent for plan execution with full workflow logic built-in
-- `gsd-verifier` subagent: Goal-backward verification that checks if phase goals are actually achieved (not just tasks completed)
+- `rrr-executor` subagent: Dedicated agent for plan execution with full workflow logic built-in
+- `rrr-verifier` subagent: Goal-backward verification that checks if phase goals are actually achieved (not just tasks completed)
 - Phase verification: Automatic verification runs when a phase completes to catch stubs and incomplete implementations
 - Goal-backward planning reference: Documentation for deriving must-haves from goals
 
 ### Changed
-- execute-plan and execute-phase now spawn `gsd-executor` subagent instead of using inline workflow
+- execute-plan and execute-phase now spawn `rrr-executor` subagent instead of using inline workflow
 - Roadmap and planning workflows enhanced with goal-backward analysis
 
 ### Removed
 - Obsolete templates (`checkpoint-resume.md`, `subagent-task-prompt.md`) — logic now lives in subagents
 
 ### Fixed
-- Updated remaining `general-purpose` subagent references to use `gsd-executor`
+- Updated remaining `general-purpose` subagent references to use `rrr-executor`
 
 ## [1.5.6] - 2025-01-15
 
@@ -254,7 +254,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **define-requirements**: Works without prior research. Gathers requirements through conversation when FEATURES.md doesn't exist.
 
 ### Removed
-- Dead `/gsd:status` command (referenced abandoned background agent model)
+- Dead `/rrr:status` command (referenced abandoned background agent model)
 - Unused `agent-history.md` template
 - `_archive/` directory with old execute-phase version
 
@@ -282,8 +282,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.5.0] - 2026-01-14
 
 ### Added
-- New `/gsd:research-project` command for pre-roadmap ecosystem research — spawns parallel agents to investigate stack, features, architecture, and pitfalls before you commit to a roadmap
-- New `/gsd:define-requirements` command for scoping v1 requirements from research findings — transforms "what exists in this domain" into "what we're building"
+- New `/rrr:research-project` command for pre-roadmap ecosystem research — spawns parallel agents to investigate stack, features, architecture, and pitfalls before you commit to a roadmap
+- New `/rrr:define-requirements` command for scoping v1 requirements from research findings — transforms "what exists in this domain" into "what we're building"
 - Requirements traceability: phases now map to specific requirement IDs with 100% coverage validation
 
 ### Changed
@@ -319,7 +319,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.4.25] - 2026-01-14
 
 ### Added
-- New `/gsd:whats-new` command shows changes since your installed version
+- New `/rrr:whats-new` command shows changes since your installed version
 - VERSION file written during installation for version tracking
 - CHANGELOG.md now included in package installation
 
@@ -452,7 +452,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.4.3] - 2026-01-13
 
 ### Added
-- `/gsd:debug` command for systematic debugging with persistent state
+- `/rrr:debug` command for systematic debugging with persistent state
 
 ## [1.4.2] - 2026-01-13
 
@@ -462,9 +462,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.4.1] - 2026-01-13
 
 ### Added
-- Parallel phase execution via `/gsd:execute-phase`
-- Parallel-aware planning in `/gsd:plan-phase`
-- `/gsd:status` command for parallel agent monitoring
+- Parallel phase execution via `/rrr:execute-phase`
+- Parallel-aware planning in `/rrr:plan-phase`
+- `/rrr:status` command for parallel agent monitoring
 - Parallelization configuration in config.json
 - Wave-based parallel execution with dependency graphs
 
@@ -487,7 +487,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.3.34] - 2026-01-11
 
 ### Added
-- `/gsd:add-todo` and `/gsd:check-todos` for mid-session idea capture
+- `/rrr:add-todo` and `/rrr:check-todos` for mid-session idea capture
 
 ## [1.3.33] - 2026-01-11
 
@@ -500,7 +500,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.3.32] - 2026-01-10
 
 ### Added
-- `/gsd:resume-task` for resuming interrupted subagent executions
+- `/rrr:resume-task` for resuming interrupted subagent executions
 
 ## [1.3.31] - 2026-01-08
 
@@ -516,15 +516,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.3.29] - 2026-01-08
 
 ### Added
-- `/gsd:verify-work` for conversational UAT validation
-- `/gsd:plan-fix` for fixing UAT issues
+- `/rrr:verify-work` for conversational UAT validation
+- `/rrr:plan-fix` for fixing UAT issues
 - UAT issues template
 
 ## [1.3.28] - 2026-01-07
 
 ### Added
 - `--config-dir` CLI argument for multi-account setups
-- `/gsd:remove-phase` command
+- `/rrr:remove-phase` command
 
 ### Fixed
 - Validation for --config-dir edge cases
@@ -672,12 +672,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.3.1] - 2025-12-17
 
 ### Added
-- `/gsd:map-codebase` documentation in help and README
+- `/rrr:map-codebase` documentation in help and README
 
 ## [1.3.0] - 2025-12-17
 
 ### Added
-- `/gsd:map-codebase` command for brownfield project analysis
+- `/rrr:map-codebase` command for brownfield project analysis
 - Codebase map templates (stack, architecture, structure, conventions, testing, integrations, concerns)
 - Parallel Explore agent orchestration for codebase analysis
 - Brownfield integration into GSD workflows
@@ -773,9 +773,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - Pre-roadmap research workflow
-- `/gsd:research-phase` for niche domain ecosystem discovery
-- `/gsd:research-project` command with workflow and templates
-- `/gsd:create-roadmap` command with research-aware workflow
+- `/rrr:research-phase` for niche domain ecosystem discovery
+- `/rrr:research-project` command with workflow and templates
+- `/rrr:create-roadmap` command with research-aware workflow
 - Research subagent prompt templates
 
 ### Changed
@@ -785,7 +785,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.0.11] - 2025-12-15
 
 ### Added
-- `/gsd:research-phase` for niche domain ecosystem discovery
+- `/rrr:research-phase` for niche domain ecosystem discovery
 
 ## [1.0.10] - 2025-12-15
 
@@ -845,131 +845,131 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - Initial release of GSD (Get Shit Done) meta-prompting system
-- Core slash commands: `/gsd:new-project`, `/gsd:discuss-phase`, `/gsd:plan-phase`, `/gsd:execute-phase`
+- Core slash commands: `/rrr:new-project`, `/rrr:discuss-phase`, `/rrr:plan-phase`, `/rrr:execute-phase`
 - PROJECT.md and STATE.md templates
 - Phase-based development workflow
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/glittercowboy/get-shit-done/compare/v1.5.26...HEAD
-[1.5.26]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.26
-[1.5.25]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.25
-[1.5.24]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.24
-[1.5.23]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.23
-[1.5.22]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.22
-[1.5.21]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.21
-[1.5.20]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.20
-[1.5.19]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.19
-[1.5.18]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.18
-[1.5.17]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.17
-[1.5.16]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.16
-[1.5.15]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.15
-[1.5.14]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.14
-[1.5.13]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.13
-[1.5.12]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.12
-[1.5.11]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.11
-[1.5.10]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.10
-[1.5.9]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.9
-[1.5.8]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.8
-[1.5.7]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.7
-[1.5.6]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.6
-[1.5.5]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.5
-[1.5.4]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.4
-[1.5.3]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.3
-[1.5.2]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.2
-[1.5.1]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.1
-[1.5.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.0
-[1.4.29]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.29
-[1.4.28]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.28
-[1.4.27]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.27
-[1.4.26]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.26
-[1.4.25]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.25
-[1.4.24]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.24
-[1.4.23]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.23
-[1.4.22]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.22
-[1.4.21]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.21
-[1.4.20]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.20
-[1.4.19]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.19
-[1.4.18]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.18
-[1.4.17]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.17
-[1.4.16]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.16
-[1.4.15]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.15
-[1.4.14]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.14
-[1.4.13]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.13
-[1.4.12]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.12
-[1.4.11]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.11
-[1.4.10]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.10
-[1.4.9]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.9
-[1.4.8]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.8
-[1.4.7]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.7
-[1.4.6]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.6
-[1.4.5]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.5
-[1.4.4]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.4
-[1.4.3]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.3
-[1.4.2]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.2
-[1.4.1]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.1
-[1.4.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.4.0
-[1.3.34]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.34
-[1.3.33]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.33
-[1.3.32]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.32
-[1.3.31]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.31
-[1.3.30]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.30
-[1.3.29]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.29
-[1.3.28]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.28
-[1.3.27]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.27
-[1.3.26]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.26
-[1.3.25]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.25
-[1.3.24]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.24
-[1.3.23]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.23
-[1.3.22]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.22
-[1.3.21]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.21
-[1.3.20]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.20
-[1.3.19]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.19
-[1.3.18]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.18
-[1.3.17]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.17
-[1.3.16]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.16
-[1.3.15]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.15
-[1.3.14]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.14
-[1.3.13]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.13
-[1.3.12]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.12
-[1.3.11]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.11
-[1.3.10]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.10
-[1.3.9]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.9
-[1.3.8]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.8
-[1.3.7]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.7
-[1.3.6]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.6
-[1.3.5]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.5
-[1.3.4]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.4
-[1.3.3]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.3
-[1.3.2]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.2
-[1.3.1]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.1
-[1.3.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.3.0
-[1.2.13]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.13
-[1.2.12]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.12
-[1.2.11]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.11
-[1.2.10]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.10
-[1.2.9]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.9
-[1.2.8]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.8
-[1.2.7]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.7
-[1.2.6]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.6
-[1.2.5]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.5
-[1.2.4]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.4
-[1.2.3]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.3
-[1.2.2]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.2
-[1.2.1]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.1
-[1.2.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.2.0
-[1.1.2]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.1.2
-[1.1.1]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.1.1
-[1.1.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.1.0
-[1.0.11]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.11
-[1.0.10]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.10
-[1.0.9]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.9
-[1.0.8]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.8
-[1.0.7]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.7
-[1.0.6]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.6
-[1.0.5]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.5
-[1.0.4]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.4
-[1.0.3]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.3
-[1.0.2]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.2
-[1.0.1]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.1
-[1.0.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.0.0
+[Unreleased]: https://github.com/PA-Ai-Team/projecta-rrr/compare/v1.5.26...HEAD
+[1.5.26]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.26
+[1.5.25]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.25
+[1.5.24]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.24
+[1.5.23]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.23
+[1.5.22]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.22
+[1.5.21]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.21
+[1.5.20]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.20
+[1.5.19]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.19
+[1.5.18]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.18
+[1.5.17]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.17
+[1.5.16]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.16
+[1.5.15]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.15
+[1.5.14]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.14
+[1.5.13]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.13
+[1.5.12]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.12
+[1.5.11]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.11
+[1.5.10]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.10
+[1.5.9]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.9
+[1.5.8]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.8
+[1.5.7]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.7
+[1.5.6]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.6
+[1.5.5]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.5
+[1.5.4]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.4
+[1.5.3]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.3
+[1.5.2]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.2
+[1.5.1]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.1
+[1.5.0]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.5.0
+[1.4.29]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.29
+[1.4.28]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.28
+[1.4.27]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.27
+[1.4.26]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.26
+[1.4.25]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.25
+[1.4.24]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.24
+[1.4.23]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.23
+[1.4.22]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.22
+[1.4.21]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.21
+[1.4.20]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.20
+[1.4.19]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.19
+[1.4.18]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.18
+[1.4.17]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.17
+[1.4.16]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.16
+[1.4.15]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.15
+[1.4.14]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.14
+[1.4.13]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.13
+[1.4.12]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.12
+[1.4.11]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.11
+[1.4.10]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.10
+[1.4.9]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.9
+[1.4.8]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.8
+[1.4.7]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.7
+[1.4.6]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.6
+[1.4.5]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.5
+[1.4.4]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.4
+[1.4.3]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.3
+[1.4.2]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.2
+[1.4.1]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.1
+[1.4.0]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.4.0
+[1.3.34]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.34
+[1.3.33]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.33
+[1.3.32]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.32
+[1.3.31]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.31
+[1.3.30]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.30
+[1.3.29]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.29
+[1.3.28]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.28
+[1.3.27]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.27
+[1.3.26]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.26
+[1.3.25]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.25
+[1.3.24]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.24
+[1.3.23]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.23
+[1.3.22]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.22
+[1.3.21]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.21
+[1.3.20]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.20
+[1.3.19]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.19
+[1.3.18]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.18
+[1.3.17]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.17
+[1.3.16]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.16
+[1.3.15]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.15
+[1.3.14]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.14
+[1.3.13]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.13
+[1.3.12]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.12
+[1.3.11]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.11
+[1.3.10]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.10
+[1.3.9]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.9
+[1.3.8]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.8
+[1.3.7]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.7
+[1.3.6]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.6
+[1.3.5]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.5
+[1.3.4]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.4
+[1.3.3]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.3
+[1.3.2]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.2
+[1.3.1]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.1
+[1.3.0]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.3.0
+[1.2.13]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.13
+[1.2.12]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.12
+[1.2.11]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.11
+[1.2.10]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.10
+[1.2.9]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.9
+[1.2.8]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.8
+[1.2.7]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.7
+[1.2.6]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.6
+[1.2.5]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.5
+[1.2.4]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.4
+[1.2.3]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.3
+[1.2.2]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.2
+[1.2.1]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.1
+[1.2.0]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.2.0
+[1.1.2]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.1.2
+[1.1.1]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.1.1
+[1.1.0]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.1.0
+[1.0.11]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.11
+[1.0.10]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.10
+[1.0.9]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.9
+[1.0.8]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.8
+[1.0.7]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.7
+[1.0.6]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.6
+[1.0.5]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.5
+[1.0.4]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.4
+[1.0.3]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.3
+[1.0.2]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.2
+[1.0.1]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.1
+[1.0.0]: https://github.com/PA-Ai-Team/projecta-rrr/releases/tag/v1.0.0

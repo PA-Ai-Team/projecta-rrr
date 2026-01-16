@@ -21,10 +21,10 @@ tech-stack:
 
 key-files:
   created:
-    - get-shit-done/workflows/verify-work.md
-    - get-shit-done/templates/uat-issues.md
+    - rrr/workflows/verify-work.md
+    - rrr/templates/uat-issues.md
   modified:
-    - commands/gsd/verify-work.md
+    - commands/rrr/verify-work.md
 
 key-decisions:
   - "Phase-scoped issues (not global ISSUES.md) for UAT findings"
@@ -70,9 +70,9 @@ completed: 2026-01-08
 
 ## Files Created/Modified
 
-- `get-shit-done/workflows/verify-work.md` - UAT workflow with 8 terse steps
-- `get-shit-done/templates/uat-issues.md` - Phase-scoped issue format with severity guide
-- `commands/gsd/verify-work.md` - Refactored to delegate to workflow
+- `rrr/workflows/verify-work.md` - UAT workflow with 8 terse steps
+- `rrr/templates/uat-issues.md` - Phase-scoped issue format with severity guide
+- `commands/rrr/verify-work.md` - Refactored to delegate to workflow
 
 ## Decisions Made
 
@@ -91,7 +91,7 @@ None
 ## Next Phase Readiness
 
 - verify-work workflow ready for use
-- Next: Create `/gsd:plan-fix` command to complete verify → fix loop
+- Next: Create `/rrr:plan-fix` command to complete verify → fix loop
 - README.md update needed to document new commands
 
 ---

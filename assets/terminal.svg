@@ -12,6 +12,8 @@
       .command { fill: #c0caf5; }
       .cyan { fill: #7dcfff; }
       .green { fill: #9ece6a; }
+      .yellow { fill: #e0af68; }
+      .orange { fill: #ff9e64; }
       .dim { fill: #565f89; }
       .white { fill: #c0caf5; }
     </style>
@@ -38,27 +40,27 @@
     <!-- Prompt line -->
     <text class="text prompt" font-size="15" y="0">~</text>
     <text class="text dim" font-size="15" x="16" y="0">$</text>
-    <text class="text command" font-size="15" x="36" y="0">npx get-shit-done-cc</text>
+    <text class="text command" font-size="15" x="36" y="0">npx projecta-rrr</text>
 
-    <!-- Banner -->
-    <text class="text cyan" font-size="14" y="48" xml:space="preserve">   ██████╗ ███████╗██████╗</text>
-    <text class="text cyan" font-size="14" y="68" xml:space="preserve">  ██╔════╝ ██╔════╝██╔══██╗</text>
-    <text class="text cyan" font-size="14" y="88" xml:space="preserve">  ██║  ███╗███████╗██║  ██║</text>
-    <text class="text cyan" font-size="14" y="108" xml:space="preserve">  ██║   ██║╚════██║██║  ██║</text>
-    <text class="text cyan" font-size="14" y="128" xml:space="preserve">  ╚██████╔╝███████║██████╔╝</text>
-    <text class="text cyan" font-size="14" y="148" xml:space="preserve">   ╚═════╝ ╚══════╝╚═════╝</text>
+    <!-- Banner - RRR in yellow -->
+    <text class="text yellow" font-size="14" y="48" xml:space="preserve">  ██████╗ ██████╗ ██████╗ </text>
+    <text class="text yellow" font-size="14" y="68" xml:space="preserve">  ██╔══██╗██╔══██╗██╔══██╗</text>
+    <text class="text yellow" font-size="14" y="88" xml:space="preserve">  ██████╔╝██████╔╝██████╔╝</text>
+    <text class="text yellow" font-size="14" y="108" xml:space="preserve">  ██╔══██╗██╔══██╗██╔══██╗</text>
+    <text class="text yellow" font-size="14" y="128" xml:space="preserve">  ██║  ██║██║  ██║██║  ██║</text>
+    <text class="text yellow" font-size="14" y="148" xml:space="preserve">  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝</text>
 
     <!-- Title and subtitle -->
-    <text class="text white" font-size="15" y="188">  Get Shit Done <tspan class="dim">v1.0.1</tspan></text>
+    <text class="text white" font-size="15" y="188">  <tspan class="yellow">RRR</tspan> <tspan class="dim">v1.5.26</tspan></text>
     <text class="text white" font-size="15" y="212">  A meta-prompting, context engineering and spec-driven</text>
-    <text class="text white" font-size="15" y="232">  development system for Claude Code by TÂCHES.</text>
+    <text class="text white" font-size="15" y="232">  development system for Claude Code by Projecta.ai</text>
 
     <!-- Install output -->
-    <text class="text" font-size="15" y="280"><tspan class="green">  ✓</tspan><tspan class="white"> Installed commands/gsd</tspan></text>
-    <text class="text" font-size="15" y="304"><tspan class="green">  ✓</tspan><tspan class="white"> Installed get-shit-done</tspan></text>
+    <text class="text" font-size="15" y="280"><tspan class="green">  ✓</tspan><tspan class="white"> Installed commands/rrr</tspan></text>
+    <text class="text" font-size="15" y="304"><tspan class="green">  ✓</tspan><tspan class="white"> Installed rrr</tspan></text>
 
     <!-- Done message -->
-    <text class="text" font-size="15" y="352"><tspan class="green">  Done!</tspan><tspan class="white"> Run </tspan><tspan class="cyan">/gsd:help</tspan><tspan class="white"> to get started.</tspan></text>
+    <text class="text" font-size="15" y="352"><tspan class="green">  Done!</tspan><tspan class="white"> Run </tspan><tspan class="cyan">/rrr:help</tspan><tspan class="white"> to get started.</tspan></text>
 
     <!-- New prompt -->
     <text class="text prompt" font-size="15" y="400">~</text>

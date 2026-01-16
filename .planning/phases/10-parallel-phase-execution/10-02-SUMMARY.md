@@ -21,7 +21,7 @@ tech-stack:
   patterns: [parallel-agent-orchestration, wave-based-execution, orchestrator-commits]
 
 key-files:
-  created: [get-shit-done/workflows/execute-phase.md]
+  created: [rrr/workflows/execute-phase.md]
   modified: []
 
 key-decisions:
@@ -72,7 +72,7 @@ Each task was committed atomically:
 **Plan metadata:** TBD (docs: complete plan)
 
 ## Files Created/Modified
-- `get-shit-done/workflows/execute-phase.md` - New workflow for parallel phase execution (956 lines)
+- `rrr/workflows/execute-phase.md` - New workflow for parallel phase execution (956 lines)
 
 ## Decisions Made
 - Agents don't commit - orchestrator collects all changes and commits per-plan in order

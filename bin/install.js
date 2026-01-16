@@ -9,6 +9,7 @@ const readline = require('readline');
 const cyan = '\x1b[36m';
 const green = '\x1b[32m';
 const yellow = '\x1b[33m';
+const orange = '\x1b[91m'; // bright red (more compatible than 256-color)
 const dim = '\x1b[2m';
 const reset = '\x1b[0m';
 
@@ -16,16 +17,54 @@ const reset = '\x1b[0m';
 const pkg = require('../package.json');
 
 const banner = `
-${cyan}   ██████╗ ███████╗██████╗
-  ██╔════╝ ██╔════╝██╔══██╗
-  ██║  ███╗███████╗██║  ██║
-  ██║   ██║╚════██║██║  ██║
-  ╚██████╔╝███████║██████╔╝
-   ╚═════╝ ╚══════╝╚═════╝${reset}
+${yellow}----------------------------------#####=-=#####=--#####=------------------------------------------------
+----------------------------------##--##--##--##--##--##------------------------------------------------
+----------------------------------#####=--#####=--#####=------------------------------------------------
+----------------------------------##-##---##-##---##-##-------------------------------------------------
+----------------------------------##--##--##--##--##--##------------------------------------------------${reset}
+${orange}-------------------------------------------------##=------------------------------------------------
+-----------------------------------*------------####=-----------#+----------------------------------
+----------------------------------=###=--------*####*---------*##=----------------------------------
+----------------------------------=#####=-----########-----=#####+----------------------------------
+----------------------------------+#######+--+########*--+#######*----------------------------------
+----------------------------------+###########*++++++*###########*----------------------------------
+----------------------+#*+--------+#####+-----------------=*#####*-------=+*#+----------------------
+-----------------------*#######+=-*#*=------------------------=*#*-=*########-----------------------
+------------------------##########=------------------------------=##########------------------------
+------------------------=#######=----------------------------------=#######=------------------------
+-------------------------+####+--------------------------------------+####+-------------------------
+--------------------------*##=----------------------------------------=##*--------------------------
+-----------------------==+*#--------------------------------------------##*++=----------------------
+--------------=############----------------------------------------------*###########+--------------
+----------------+#########=----------------------------------------------=#########+----------------
+------------------+######+------------------------------------------------+######*------------------
+--------------------+####=-----------------------=+------------------------####+--------------------
+----------------------+##--------------------+#+####+#*--------------------*#+----------------------
+----------------------+#+--------------------+########*--------------------+##+---------------------
+------------------=*####+--------------------+########*--------------------*#####+------------------
+----------------+########----------------+##++######***=##*----------------#########+---------------
+-------------+###########-----------------=#++########*=##-----------------###########*=------------
+----------------=+#######=----------------+#++########*=##----------------=######*+=----------------
+---------------------=+*#*----------------+#++########*=##----------------*#*+----------------------
+------------------------------------------+#=+########*-##------------------------------------------
+-----------------*==+*#######==--------------------------------------==*#######+==*=----------------
+-----------------*#############*------########################=-----*##############-----------------
+-----------------*###############*----########################=---+################-----------------
+-----------------##################=--########################=--*#################-----------------
+----------------=#####=-#######=============-==========-=============*######==#####+----------------
+----------------####=---*######=############+*#########=############=*######---=####=---------------
+----------------##+*=---#######=############=++++++++++-############=*######=---*+##----------------
+-----------------=-----+#######=############=*#########=############+*######*-----=-----------------
+----------------------+##=*+*+*++++++*******=+**+++++**=**+++++++*********++#+----------------------
+---------------------*###+##################=*#########=##################*+##*---------------------
+--------------------+####+##################=+*********=##################*+###*--------------------
+--------------------*####=******************=+*********=******************++####--------------------
+-------------------*************************=+*********=*************************=------------------
+-------------------#########################+**********=#########################-------------------${reset}
 
-  Get Shit Done ${dim}v${pkg.version}${reset}
+  ${yellow}RRR${reset} ${dim}v${pkg.version}${reset}
   A meta-prompting, context engineering and spec-driven
-  development system for Claude Code by TÂCHES.
+  development system for Claude Code by Projecta.ai
 `;
 
 // Parse args
@@ -62,7 +101,7 @@ console.log(banner);
 
 // Show help if requested
 if (hasHelp) {
-  console.log(`  ${yellow}Usage:${reset} npx get-shit-done-cc [options]
+  console.log(`  ${yellow}Usage:${reset} npx projecta-rrr [options]
 
   ${yellow}Options:${reset}
     ${cyan}-g, --global${reset}              Install globally (to Claude config directory)
@@ -75,16 +114,16 @@ if (hasHelp) {
 
   ${yellow}Examples:${reset}
     ${dim}# Install to default ~/.claude directory${reset}
-    npx get-shit-done-cc --global
+    npx projecta-rrr --global
 
     ${dim}# Install to custom config directory (for multiple Claude accounts)${reset}
-    npx get-shit-done-cc --global --config-dir ~/.claude-bc
+    npx projecta-rrr --global --config-dir ~/.claude-bc
 
     ${dim}# Using environment variable${reset}
-    CLAUDE_CONFIG_DIR=~/.claude-bc npx get-shit-done-cc --global
+    CLAUDE_CONFIG_DIR=~/.claude-bc npx projecta-rrr --global
 
     ${dim}# Install to current project only${reset}
-    npx get-shit-done-cc --local
+    npx projecta-rrr --local
 
   ${yellow}Notes:${reset}
     The --config-dir option is useful when you have multiple Claude Code
@@ -178,17 +217,17 @@ function install(isGlobal) {
   const commandsDir = path.join(claudeDir, 'commands');
   fs.mkdirSync(commandsDir, { recursive: true });
 
-  // Copy commands/gsd with path replacement
-  const gsdSrc = path.join(src, 'commands', 'gsd');
-  const gsdDest = path.join(commandsDir, 'gsd');
-  copyWithPathReplacement(gsdSrc, gsdDest, pathPrefix);
-  console.log(`  ${green}✓${reset} Installed commands/gsd`);
+  // Copy commands/rrr with path replacement
+  const rrrSrc = path.join(src, 'commands', 'rrr');
+  const rrrDest = path.join(commandsDir, 'rrr');
+  copyWithPathReplacement(rrrSrc, rrrDest, pathPrefix);
+  console.log(`  ${green}✓${reset} Installed commands/rrr`);
 
-  // Copy get-shit-done skill with path replacement
-  const skillSrc = path.join(src, 'get-shit-done');
-  const skillDest = path.join(claudeDir, 'get-shit-done');
+  // Copy rrr skill with path replacement
+  const skillSrc = path.join(src, 'rrr');
+  const skillDest = path.join(claudeDir, 'rrr');
   copyWithPathReplacement(skillSrc, skillDest, pathPrefix);
-  console.log(`  ${green}✓${reset} Installed get-shit-done`);
+  console.log(`  ${green}✓${reset} Installed rrr`);
 
   // Copy agents to ~/.claude/agents (subagents must be at root level)
   const agentsSrc = path.join(src, 'agents');
@@ -200,14 +239,14 @@ function install(isGlobal) {
 
   // Copy CHANGELOG.md
   const changelogSrc = path.join(src, 'CHANGELOG.md');
-  const changelogDest = path.join(claudeDir, 'get-shit-done', 'CHANGELOG.md');
+  const changelogDest = path.join(claudeDir, 'rrr', 'CHANGELOG.md');
   if (fs.existsSync(changelogSrc)) {
     fs.copyFileSync(changelogSrc, changelogDest);
     console.log(`  ${green}✓${reset} Installed CHANGELOG.md`);
   }
 
   // Write VERSION file for whats-new command
-  const versionDest = path.join(claudeDir, 'get-shit-done', 'VERSION');
+  const versionDest = path.join(claudeDir, 'rrr', 'VERSION');
   fs.writeFileSync(versionDest, pkg.version);
   console.log(`  ${green}✓${reset} Wrote VERSION (${pkg.version})`);
 
@@ -236,11 +275,11 @@ function install(isGlobal) {
     ? '$HOME/.claude/hooks/statusline.sh'
     : '.claude/hooks/statusline.sh';
   const updateCheckCommand = isGlobal
-    ? '$HOME/.claude/hooks/gsd-check-update.sh'
-    : '.claude/hooks/gsd-check-update.sh';
+    ? '$HOME/.claude/hooks/rrr-check-update.sh'
+    : '.claude/hooks/rrr-check-update.sh';
   const notifyCommand = isGlobal
-    ? '$HOME/.claude/hooks/gsd-notify.sh'
-    : '.claude/hooks/gsd-notify.sh';
+    ? '$HOME/.claude/hooks/rrr-notify.sh'
+    : '.claude/hooks/rrr-notify.sh';
 
   // Configure SessionStart hook for update checking
   if (!settings.hooks) {
@@ -250,12 +289,12 @@ function install(isGlobal) {
     settings.hooks.SessionStart = [];
   }
 
-  // Check if GSD update hook already exists
-  const hasGsdUpdateHook = settings.hooks.SessionStart.some(entry =>
-    entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-check-update'))
+  // Check if RRR update hook already exists
+  const hasRrrUpdateHook = settings.hooks.SessionStart.some(entry =>
+    entry.hooks && entry.hooks.some(h => h.command && h.command.includes('rrr-check-update'))
   );
 
-  if (!hasGsdUpdateHook) {
+  if (!hasRrrUpdateHook) {
     settings.hooks.SessionStart.push({
       hooks: [
         {
@@ -286,9 +325,9 @@ function finishInstall(settingsPath, settings, statuslineCommand, notifyCommand,
     if (!settings.hooks.Stop) {
       settings.hooks.Stop = [];
     }
-    // Remove any existing GSD notify hook first
+    // Remove any existing RRR notify hook first
     settings.hooks.Stop = settings.hooks.Stop.filter(entry =>
-      !(entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-notify')))
+      !(entry.hooks && entry.hooks.some(h => h.command && h.command.includes('rrr-notify')))
     );
     settings.hooks.Stop.push({
       hooks: [
@@ -305,7 +344,7 @@ function finishInstall(settingsPath, settings, statuslineCommand, notifyCommand,
   writeSettings(settingsPath, settings);
 
   console.log(`
-  ${green}Done!${reset} Launch Claude Code and run ${cyan}/gsd:help${reset}.
+  ${green}Done!${reset} Launch Claude Code and run ${cyan}/rrr:help${reset}.
 `);
 }
 
@@ -349,13 +388,13 @@ function handleStatusline(settings, isInteractive, callback) {
   Your current statusline:
     ${dim}command: ${existingCmd}${reset}
 
-  GSD includes a statusline showing:
+  RRR includes a statusline showing:
     • Model name
     • Current task (from todo list)
     • Context window usage (color-coded)
 
   ${cyan}1${reset}) Keep existing
-  ${cyan}2${reset}) Replace with GSD statusline
+  ${cyan}2${reset}) Replace with RRR statusline
 `);
 
   rl.question(`  Choice ${dim}[1]${reset}: `, (answer) => {
@@ -375,9 +414,9 @@ function handleNotifications(settings, isInteractive, callback) {
     return;
   }
 
-  // Check if GSD notify hook already exists
+  // Check if RRR notify hook already exists
   const hasExisting = settings.hooks?.Stop?.some(entry =>
-    entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-notify'))
+    entry.hooks && entry.hooks.some(h => h.command && h.command.includes('rrr-notify'))
   );
 
   // No existing - just install it
@@ -409,13 +448,13 @@ function handleNotifications(settings, isInteractive, callback) {
   console.log(`
   ${yellow}⚠${reset} Existing notification hook detected
 
-  GSD includes completion notifications that alert you when:
+  RRR includes completion notifications that alert you when:
     • A phase completes planning or execution
     • Claude stops and needs your input
     • Works on Mac, Linux, and Windows
 
   ${cyan}1${reset}) Keep existing
-  ${cyan}2${reset}) Replace with GSD notifications
+  ${cyan}2${reset}) Replace with RRR notifications
 `);
 
   rl.question(`  Choice ${dim}[1]${reset}: `, (answer) => {

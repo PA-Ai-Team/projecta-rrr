@@ -38,7 +38,7 @@ score: 12/12 must-haves verified
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
 | `agents/gsd-plan-checker.md` | Plan verification agent (400-600 lines) | VERIFIED | 744 lines, 9 sections (exceeds 7 required), complete methodology |
-| `commands/gsd/plan-phase.md` | Orchestrator with verification loop (200+ lines) | VERIFIED | 310 lines, 11 process steps, planner -> checker -> revise loop |
+| `commands/rrr/plan-phase.md` | Orchestrator with verification loop (200+ lines) | VERIFIED | 310 lines, 11 process steps, planner -> checker -> revise loop |
 | `agents/gsd-planner.md` | Planner with revision mode (1100+ lines) | VERIFIED | 1284 lines, revision_mode section added (~105 lines) |
 
 ### Key Link Verification

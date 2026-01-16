@@ -22,7 +22,7 @@ tech-stack:
 key-files:
   created: []
   modified:
-    - get-shit-done/workflows/plan-phase.md
+    - rrr/workflows/plan-phase.md
 
 key-decisions:
   - "Vertical slices preferred over workflow stages when parallelization enabled"
@@ -69,7 +69,7 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `get-shit-done/workflows/plan-phase.md` - Added parallelization_aware step and frontmatter guidance
+- `rrr/workflows/plan-phase.md` - Added parallelization_aware step and frontmatter guidance
 
 ## Decisions Made
 

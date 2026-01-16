@@ -26,8 +26,8 @@ tech-stack:
 key-files:
   created: []
   modified:
-    - get-shit-done/references/scope-estimation.md
-    - get-shit-done/templates/phase-prompt.md
+    - rrr/references/scope-estimation.md
+    - rrr/templates/phase-prompt.md
 
 key-decisions:
   - "Vertical slices maximize Wave 1 plans vs workflow-stage grouping"
@@ -72,8 +72,8 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `get-shit-done/references/scope-estimation.md` - Added parallel_aware_splitting section with philosophy shift, vertical slice examples, when to restructure, file ownership, SUMMARY references
-- `get-shit-done/templates/phase-prompt.md` - Added parallel-aware and sequential plan examples with frontmatter patterns
+- `rrr/references/scope-estimation.md` - Added parallel_aware_splitting section with philosophy shift, vertical slice examples, when to restructure, file ownership, SUMMARY references
+- `rrr/templates/phase-prompt.md` - Added parallel-aware and sequential plan examples with frontmatter patterns
 
 ## Decisions Made
 
@@ -91,7 +91,7 @@ None
 
 - Phase 11: Parallel-Aware Planning complete
 - All 4 plans finished (template, workflow, execute-phase, documentation)
-- Milestone complete - ready for `/gsd:complete-milestone`
+- Milestone complete - ready for `/rrr:complete-milestone`
 
 ---
 *Phase: 11-parallel-aware-planning*

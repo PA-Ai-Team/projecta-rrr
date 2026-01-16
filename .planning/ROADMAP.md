@@ -2,7 +2,7 @@
 
 ## Overview
 
-Add comprehensive brownfield support to GSD. Users adopting GSD for existing codebases will have a systematic way to capture architectural knowledge before planning begins. A new `/gsd:map-codebase` workflow will produce structured `.planning/codebase/` documents that stay current as plans execute.
+Add comprehensive brownfield support to GSD. Users adopting GSD for existing codebases will have a systematic way to capture architectural knowledge before planning begins. A new `/rrr:map-codebase` workflow will produce structured `.planning/codebase/` documents that stay current as plans execute.
 
 ## Domain Expertise
 
@@ -15,14 +15,14 @@ None - this is internal GSD development following existing command/workflow/temp
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [ ] **Phase 1: Templates & Structure** - Create codebase map templates and folder structure
-- [ ] **Phase 2: Map Codebase Command** - Build /gsd:map-codebase with parallel Explore agents
+- [ ] **Phase 2: Map Codebase Command** - Build /rrr:map-codebase with parallel Explore agents
 - [ ] **Phase 3: Integration** - Wire brownfield support into existing GSD workflows
 - [x] **Phase 10: Parallel Phase Execution** - Separate single-plan vs multi-plan execution with intelligent parallelization
 - [x] **Phase 11: Parallel-Aware Planning** - Update plan-phase.md to create parallelizable plans when config enables it
-- [x] **Phase 12: Changelog & Update Awareness** - Add changelog generation and /gsd:whats-new for version discovery
-- [x] **Phase 13: Dedicated Debug Agent** - Create gsd-debugger agent, refactor /gsd:debug to thin orchestrator
+- [x] **Phase 12: Changelog & Update Awareness** - Add changelog generation and /rrr:whats-new for version discovery
+- [x] **Phase 13: Dedicated Debug Agent** - Create gsd-debugger agent, refactor /rrr:debug to thin orchestrator
 - [x] **Phase 14: Dedicated Researcher Agent** - Create gsd-researcher agent for structured research with baked-in methodology
-- [x] **Phase 15: Dedicated Planner Agent** - Create gsd-planner agent, refactor /gsd:plan-phase to thin orchestrator
+- [x] **Phase 15: Dedicated Planner Agent** - Create gsd-planner agent, refactor /rrr:plan-phase to thin orchestrator
 - [x] **Phase 16: Plan Verification Loop** - Add planner → checker → revise loop before execution
 - [x] **Phase 99: Test Parallel (THROWAWAY)** - Create 3 silly independent files to test parallel execution
 
@@ -44,14 +44,14 @@ Documents to template:
 - concerns.md (tech debt, known issues)
 
 ### Phase 2: Map Codebase Command
-**Goal**: Build the /gsd:map-codebase slash command with parallel Explore agent workflow
+**Goal**: Build the /rrr:map-codebase slash command with parallel Explore agent workflow
 **Depends on**: Phase 1
 **Research**: Unlikely (using existing Explore agent patterns, GSD workflow conventions)
 **Plans**: TBD
 
 Components:
-- Slash command: `commands/gsd/map-codebase.md`
-- Workflow: `get-shit-done/workflows/map-codebase.md`
+- Slash command: `commands/rrr/map-codebase.md`
+- Workflow: `rrr/workflows/map-codebase.md`
 - Parallel Explore agent orchestration
 - Output to `.planning/codebase/`
 
@@ -62,12 +62,12 @@ Components:
 **Plans**: TBD
 
 Integration points:
-- `/gsd:new-project` - detect existing code, offer to map first
-- `/gsd:plan-phase` - load relevant codebase context automatically
+- `/rrr:new-project` - detect existing code, offer to map first
+- `/rrr:plan-phase` - load relevant codebase context automatically
 - Post-execution - update codebase map after plan execution
 
 ### Phase 4: Plan-Phase Optimizations
-**Goal**: Reduce context usage in /gsd:plan-phase by ~37% through file consolidation and verbosity reduction
+**Goal**: Reduce context usage in /rrr:plan-phase by ~37% through file consolidation and verbosity reduction
 **Depends on**: Phase 3
 **Research**: Unlikely (internal optimization of existing files)
 **Plans**: TBD
@@ -126,28 +126,28 @@ Enable intelligent context assembly for all historical phases by adding consiste
 **Plans:** TBD
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 8 to break down)
+- [ ] TBD (run /rrr:plan-phase 8 to break down)
 
 **Details:**
 [To be added during planning]
 
 ### Phase 9: Integrate Verify-Work
 
-**Goal:** Properly integrate /gsd:verify-work into GSD with workflow delegation, templates, and /gsd:plan-fix command
+**Goal:** Properly integrate /rrr:verify-work into GSD with workflow delegation, templates, and /rrr:plan-fix command
 **Depends on:** Phase 8
 **Research:** Unlikely (refactoring contributed command to match GSD patterns)
 **Plans:** TBD
 
 Components:
-- Refactor `commands/gsd/verify-work.md` to GSD style (workflow delegation)
+- Refactor `commands/rrr/verify-work.md` to GSD style (workflow delegation)
 - Create `workflows/verify-work.md` for UAT logic
 - Create `templates/uat-issues.md` for phase-scoped issues format
-- Create `commands/gsd/plan-fix.md` for planning fixes from UAT issues
-- Update `commands/gsd/progress.md` to offer plan-fix when issues exist
+- Create `commands/rrr/plan-fix.md` for planning fixes from UAT issues
+- Update `commands/rrr/progress.md` to offer plan-fix when issues exist
 - Update README.md with new commands
 
 **Details:**
-Community contribution from OracleGreyBeard. Original command works but doesn't follow GSD patterns (no workflow delegation, inline templates, verbose steps). Refactor to match conventions, then add /gsd:plan-fix to complete the verify → fix loop.
+Community contribution from OracleGreyBeard. Original command works but doesn't follow GSD patterns (no workflow delegation, inline templates, verbose steps). Refactor to match conventions, then add /rrr:plan-fix to complete the verify → fix loop.
 
 ### Phase 10: Parallel Phase Execution
 
@@ -159,13 +159,13 @@ Community contribution from OracleGreyBeard. Original command works but doesn't 
 Plans:
 - [x] 10-01: Rename execute-phase → execute-plan - Rename workflow file, update all 9 references across commands/workflows/templates
 - [x] 10-02: Create parallel execution workflow - New `workflows/execute-phase.md` with dependency analysis, parallel spawning, orchestrator commits
-- [x] 10-03: Create execute-phase command - New `commands/gsd/execute-phase.md` + parallelization config schema in templates/config.json
+- [x] 10-03: Create execute-phase command - New `commands/rrr/execute-phase.md` + parallelization config schema in templates/config.json
 - [x] 10-04: Update agent-history schema - Extend to v1.2 with parallel_group, granularity, task_results fields
 
 **Details:**
 Structural refactoring to separate concerns:
-- `/gsd:execute-plan` executes a single PLAN.md (current behavior, ~1,700 lines)
-- `/gsd:execute-phase` executes all plans in a phase with intelligent parallelization (~1,300 lines)
+- `/rrr:execute-plan` executes a single PLAN.md (current behavior, ~1,700 lines)
+- `/rrr:execute-phase` executes all plans in a phase with intelligent parallelization (~1,300 lines)
 
 Parallelization features (adapted from PR #43):
 - Dependency analysis via `requires`/`provides` frontmatter + `<files>` overlap detection
@@ -198,7 +198,7 @@ This enables execute-phase to produce more Wave 1 plans (true independence) inst
 
 ### Phase 12: Changelog & Update Awareness
 
-**Goal:** Add changelog generation to publish workflow and `/gsd:whats-new` command for users to discover changes
+**Goal:** Add changelog generation to publish workflow and `/rrr:whats-new` command for users to discover changes
 **Depends on:** Phase 11
 **Research:** Unlikely (straightforward command + workflow additions)
 **Plans:** 3 plans
@@ -206,25 +206,25 @@ This enables execute-phase to produce more Wave 1 plans (true independence) inst
 Plans:
 - [x] 12-01: CHANGELOG.md foundation - Create changelog file, update installer to copy it
 - [x] 12-02: Publish command update - Add changelog generation to gsd-publish-version.md
-- [x] 12-03: whats-new command - Create /gsd:whats-new with remote fetch and version comparison
+- [x] 12-03: whats-new command - Create /rrr:whats-new with remote fetch and version comparison
 
 **Wave structure:**
 - Wave 1: 12-01 (foundation)
 - Wave 2: 12-02, 12-03 (parallel - both depend only on 12-01)
 
 **Details:**
-Users adopting GSD need visibility into what changed between versions. The publish workflow generates curated changelog entries (Claude-drafted, Lex-approved). `/gsd:whats-new` fetches from GitHub raw, compares to installed version, and prompts to update if behind.
+Users adopting GSD need visibility into what changed between versions. The publish workflow generates curated changelog entries (Claude-drafted, Lex-approved). `/rrr:whats-new` fetches from GitHub raw, compares to installed version, and prompts to update if behind.
 
 ### Phase 13: Dedicated Debug Agent
 
-**Goal:** Create `gsd-debugger` agent with all debugging expertise baked in, refactor `/gsd:debug` to thin orchestrator
+**Goal:** Create `gsd-debugger` agent with all debugging expertise baked in, refactor `/rrr:debug` to thin orchestrator
 **Depends on:** Phase 12
 **Research:** Unlikely (consolidating existing debugging content into agent pattern)
 **Plans:** 3 plans
 
 Plans:
 - [x] 13-01: Create gsd-debugger agent - Consolidate debugging expertise (990 lines)
-- [x] 13-02: Refactor /gsd:debug - Thin orchestrator (149 lines), deprecate workflow
+- [x] 13-02: Refactor /rrr:debug - Thin orchestrator (149 lines), deprecate workflow
 - [x] 13-03: Deprecate reference files - Replace with agent pointers
 
 **Details:**
@@ -239,8 +239,8 @@ Created gsd-debugger agent with scientific method, hypothesis testing, 7+ invest
 
 Plans:
 - [x] 14-01: Create gsd-researcher agent - Consolidate research expertise (902 lines)
-- [x] 14-02: Refactor /gsd:research-phase - Thin orchestrator (130 lines), deprecate workflow
-- [x] 14-03: Refactor /gsd:research-project - Parallel agent spawning (137 lines), deprecate workflow
+- [x] 14-02: Refactor /rrr:research-phase - Thin orchestrator (130 lines), deprecate workflow
+- [x] 14-03: Refactor /rrr:research-project - Parallel agent spawning (137 lines), deprecate workflow
 
 **Wave structure:**
 - Wave 1: 14-01 (foundation)
@@ -248,12 +248,12 @@ Plans:
 
 Components:
 - Create `agents/gsd-researcher.md` with research expertise
-- Refactor `commands/gsd/research-phase.md` to spawn gsd-researcher
-- Refactor `commands/gsd/research-project.md` to use researcher agents
+- Refactor `commands/rrr/research-phase.md` to spawn gsd-researcher
+- Refactor `commands/rrr/research-project.md` to use researcher agents
 - Define research modes: ecosystem, feasibility, implementation, comparison
 
 **Details:**
-Currently `/gsd:research-phase` does ad-hoc web searches without structure. The gsd-researcher agent brings:
+Currently `/rrr:research-phase` does ad-hoc web searches without structure. The gsd-researcher agent brings:
 - **Research methodology**: Scoping questions, evaluating sources, synthesizing findings
 - **Tool strategy**: When to WebSearch vs WebFetch vs Grep vs Context7
 - **Output formats**: Structured findings (feasibility, comparison matrices, API investigations)
@@ -268,14 +268,14 @@ Pattern: Same as gsd-executor/gsd-verifier/gsd-debugger. Agent has expertise, co
 
 ### Phase 15: Dedicated Planner Agent
 
-**Goal:** Create `gsd-planner` agent with planning expertise baked in, refactor `/gsd:plan-phase` to thin orchestrator
+**Goal:** Create `gsd-planner` agent with planning expertise baked in, refactor `/rrr:plan-phase` to thin orchestrator
 **Depends on:** Phase 14
 **Research:** Unlikely (applying same agent pattern to planning workflow)
 **Plans:** 3 plans
 
 Plans:
 - [x] 15-01: Create gsd-planner agent - Consolidate planning expertise (1,147 lines)
-- [x] 15-02: Refactor /gsd:plan-phase - Thin orchestrator (189 lines), deprecate workflow
+- [x] 15-02: Refactor /rrr:plan-phase - Thin orchestrator (189 lines), deprecate workflow
 - [x] 15-03: Deprecate reference files - Replace with agent pointers
 
 **Wave structure:**
@@ -306,7 +306,7 @@ Plans are created and executed without validation. Add `gsd-plan-checker` agent 
 
 Components:
 - Create `agents/gsd-plan-checker.md` (goal-backward plan verification)
-- Update `commands/gsd/plan-phase.md` (orchestrate planner → checker loop)
+- Update `commands/rrr/plan-phase.md` (orchestrate planner → checker loop)
 - Update `agents/gsd-planner.md` (add revision mode)
 
 ### Phase 99: Test Parallel (THROWAWAY)

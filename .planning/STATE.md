@@ -2,13 +2,13 @@
 
 ## Project Summary
 
-**Building:** Brownfield support for GSD - `/gsd:map-codebase` workflow that analyzes existing codebases using parallel Explore agents, producing structured `.planning/codebase/` documents.
+**Building:** Brownfield support for GSD - `/rrr:map-codebase` workflow that analyzes existing codebases using parallel Explore agents, producing structured `.planning/codebase/` documents.
 
 **Core requirements:**
-- `/gsd:map-codebase` produces useful codebase documents from any codebase
+- `/rrr:map-codebase` produces useful codebase documents from any codebase
 - Documents are focused (<100 lines each) and easy to update incrementally
-- `/gsd:new-project` detects existing code and offers mapping
-- `/gsd:plan-phase` loads relevant codebase context automatically
+- `/rrr:new-project` detects existing code and offers mapping
+- `/rrr:plan-phase` loads relevant codebase context automatically
 - Codebase map updates after plan execution
 
 **Constraints:**
@@ -81,17 +81,17 @@ Progress: ███████████████████████�
 | 11 | Vertical slices over workflow stages | Maximize independence when parallelization enabled |
 | 11 | SUMMARY references only when needed | Avoid reflexive sequential chains |
 | 13 | Consolidated debugging expertise to 990 lines | Complete methodology with 59% reduction from source material |
-| 13 | Thin orchestrator pattern for /gsd:debug | Orchestrator <200 lines, expertise in agent - reduces main context from ~2,400 to ~150 |
+| 13 | Thin orchestrator pattern for /rrr:debug | Orchestrator <200 lines, expertise in agent - reduces main context from ~2,400 to ~150 |
 | 13 | Deprecated reference files with redirect notices | No duplicate content between references and agent |
 | 14 | 4 explicit research modes | Ecosystem, feasibility, implementation, comparison cover all needs |
 | 14 | Context7 > Official > WebSearch hierarchy | Prevents hallucination with authoritative sources first |
 | 14 | 902 lines from ~1,200 source (25% reduction) | Preserved all concepts while removing redundancy |
-| 14 | Thin orchestrator for /gsd:research-phase | Orchestrator 130 lines, expertise in agent |
-| 14 | Parallel agent spawning for /gsd:research-project | 4 agents (stack, features, architecture, pitfalls) maximize throughput |
+| 14 | Thin orchestrator for /rrr:research-phase | Orchestrator 130 lines, expertise in agent |
+| 14 | Parallel agent spawning for /rrr:research-project | 4 agents (stack, features, architecture, pitfalls) maximize throughput |
 | 15 | 1,147 lines from ~3,580 source (68% reduction) | Complete planning methodology consolidated into single agent |
 | 15 | 14 sections covering full planning workflow | Includes discovery, task breakdown, dependency graph, goal-backward, checkpoints, TDD, gap closure |
 | 15 | Deprecation notices point to specific agent sections | Planning references deprecated, content in gsd-planner |
-| 15 | 189 lines thin orchestrator for /gsd:plan-phase | Under 200 target, uses agent: gsd-planner frontmatter |
+| 15 | 189 lines thin orchestrator for /rrr:plan-phase | Under 200 target, uses agent: gsd-planner frontmatter |
 | 15 | Context-only planner-subagent-prompt.md template | Follows debug/research template pattern |
 | 16 | Six verification dimensions | Coverage, completeness, dependencies, links, scope, derivation |
 | 16 | Checker verifies plans WILL achieve goal | Same methodology as verifier but applied to plans pre-execution |
@@ -117,9 +117,9 @@ None yet.
 - Phase 7 added: Backfill existing summaries with frontmatter
 - Phase 8 added: Improve roadmap system
 - Phase 9 added: Integrate verify-work (community contribution from OracleGreyBeard)
-- Phase 10 added: Parallel phase execution (rename workflow, create /gsd:execute-phase with parallelization)
+- Phase 10 added: Parallel phase execution (rename workflow, create /rrr:execute-phase with parallelization)
 - Phase 11 added: Parallel-aware planning (update plan-phase.md to create parallelizable plans when enabled)
-- Phase 12 added: Changelog & update awareness (remote changelog fetch, /gsd:whats-new, publish workflow integration)
+- Phase 12 added: Changelog & update awareness (remote changelog fetch, /rrr:whats-new, publish workflow integration)
 - Phase 13 added: Dedicated debug agent (gsd-debugger with baked-in expertise, thin orchestrator pattern)
 - Phase 14 added: Dedicated researcher agent (gsd-researcher with research methodology, tool strategy, output formats)
 - Phase 15 added: Dedicated planner agent (gsd-planner with planning expertise, refactor plan-phase to thin orchestrator)

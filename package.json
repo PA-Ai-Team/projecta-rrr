@@ -1,14 +1,14 @@
 {
-  "name": "get-shit-done-cc",
+  "name": "projecta-rrr",
   "version": "1.5.26",
-  "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code by TÂCHES.",
+  "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code by Projecta.ai",
   "bin": {
-    "get-shit-done-cc": "bin/install.js"
+    "projecta-rrr": "bin/install.js"
   },
   "files": [
     "bin",
     "commands",
-    "get-shit-done",
+    "rrr",
     "agents",
     "hooks"
   ],
@@ -20,11 +20,11 @@
     "context-engineering",
     "spec-driven-development"
   ],
-  "author": "TÂCHES",
+  "author": "Projecta.ai",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/glittercowboy/get-shit-done.git"
+    "url": "git+https://github.com/PA-Ai-Team/projecta-rrr.git"
   },
   "engines": {
     "node": ">=16.7.0"

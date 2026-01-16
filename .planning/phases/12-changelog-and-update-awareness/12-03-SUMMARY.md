@@ -8,7 +8,7 @@ requires:
   - phase: 12-01
     provides: CHANGELOG.md file and installer changelog copy
 provides:
-  - /gsd:whats-new command for version comparison
+  - /rrr:whats-new command for version comparison
   - VERSION file written during installation
   - Help documentation for whats-new command
 affects: []
@@ -21,10 +21,10 @@ tech-stack:
 
 key-files:
   created:
-    - commands/gsd/whats-new.md
+    - commands/rrr/whats-new.md
   modified:
     - bin/install.js
-    - commands/gsd/help.md
+    - commands/rrr/help.md
 
 key-decisions:
   - "VERSION file approach (simpler than parsing package.json)"
@@ -37,7 +37,7 @@ completed: 2026-01-14
 
 # Phase 12 Plan 03: whats-new Command Summary
 
-**/gsd:whats-new command created for users to discover changes since their installed version, with VERSION file written during installation and help documentation updated**
+**/rrr:whats-new command created for users to discover changes since their installed version, with VERSION file written during installation and help documentation updated**
 
 ## Performance
 
@@ -48,7 +48,7 @@ completed: 2026-01-14
 - **Files modified:** 3
 
 ## Accomplishments
-- Created /gsd:whats-new command with remote changelog fetch
+- Created /rrr:whats-new command with remote changelog fetch
 - Added VERSION file creation to installer
 - Updated help.md with whats-new command documentation
 
@@ -61,9 +61,9 @@ Each task was committed atomically:
 3. **Task 3: Update help.md to include whats-new command** - `68f3cd1` (docs)
 
 ## Files Created/Modified
-- `commands/gsd/whats-new.md` - Command for version comparison and changelog display
+- `commands/rrr/whats-new.md` - Command for version comparison and changelog display
 - `bin/install.js` - Added VERSION file creation during installation
-- `commands/gsd/help.md` - Added whats-new to Utility Commands section
+- `commands/rrr/help.md` - Added whats-new to Utility Commands section
 
 ## Decisions Made
 - VERSION file approach chosen over parsing package.json (simpler, more reliable)
@@ -78,7 +78,7 @@ None - plan executed exactly as written.
 None
 
 ## Next Phase Readiness
-- /gsd:whats-new command ready for users to discover updates
+- /rrr:whats-new command ready for users to discover updates
 - Phase 12 complete (all 3 plans finished)
 - Ready for phase completion and milestone wrap-up
 

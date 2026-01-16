@@ -11,7 +11,7 @@ requires:
     provides: execute-phase.md parallel workflow
 
 provides:
-  - /gsd:execute-phase slash command
+  - /rrr:execute-phase slash command
   - parallelization config schema in config.json
   - command documentation in README.md and help.md
 
@@ -23,11 +23,11 @@ tech-stack:
 
 key-files:
   created:
-    - commands/gsd/execute-phase.md
+    - commands/rrr/execute-phase.md
   modified:
-    - get-shit-done/templates/config.json
+    - rrr/templates/config.json
     - README.md
-    - commands/gsd/help.md
+    - commands/rrr/help.md
 
 key-decisions:
   - "Config schema uses parallelization section with plan_level/task_level for future extensibility"
@@ -44,7 +44,7 @@ completed: 2026-01-12
 
 # Phase 10 Plan 03: Create Execute-Phase Command Summary
 
-**New /gsd:execute-phase command with parallelization config and documentation for parallel "walk away" phase execution.**
+**New /rrr:execute-phase command with parallelization config and documentation for parallel "walk away" phase execution.**
 
 ## Performance
 
@@ -56,7 +56,7 @@ completed: 2026-01-12
 
 ## Accomplishments
 
-- Created /gsd:execute-phase slash command that references execute-phase.md workflow
+- Created /rrr:execute-phase slash command that references execute-phase.md workflow
 - Added parallelization configuration section to config.json template
 - Updated README.md and help.md with new command documentation
 
@@ -70,15 +70,15 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `commands/gsd/execute-phase.md` - New slash command for parallel phase execution
-- `get-shit-done/templates/config.json` - Added parallelization section with 6 config options
+- `commands/rrr/execute-phase.md` - New slash command for parallel phase execution
+- `rrr/templates/config.json` - Added parallelization section with 6 config options
 - `README.md` - Added execute-phase to command table and explained when to use each
-- `commands/gsd/help.md` - Added full usage entry with config options
+- `commands/rrr/help.md` - Added full usage entry with config options
 
 ## Decisions Made
 
 - Config schema uses dedicated `parallelization` section with `plan_level`/`task_level` flags for future extensibility
-- Documentation explicitly explains when to use `/gsd:execute-plan` vs `/gsd:execute-phase`
+- Documentation explicitly explains when to use `/rrr:execute-plan` vs `/rrr:execute-phase`
 
 ## Deviations from Plan
 

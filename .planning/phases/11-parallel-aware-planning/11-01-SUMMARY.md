@@ -20,7 +20,7 @@ tech-stack:
 
 key-files:
   created: []
-  modified: [get-shit-done/templates/phase-prompt.md, get-shit-done/workflows/plan-phase.md]
+  modified: [rrr/templates/phase-prompt.md, rrr/workflows/plan-phase.md]
 
 key-decisions:
   - "Default parallelizable to false for safety"
@@ -66,8 +66,8 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `get-shit-done/templates/phase-prompt.md` - Added parallelizable, depends_on, files_exclusive fields with guidance
-- `get-shit-done/workflows/plan-phase.md` - Added read_parallelization_config step after load_project_state
+- `rrr/templates/phase-prompt.md` - Added parallelizable, depends_on, files_exclusive fields with guidance
+- `rrr/workflows/plan-phase.md` - Added read_parallelization_config step after load_project_state
 
 ## Decisions Made
 

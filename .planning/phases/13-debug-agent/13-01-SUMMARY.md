@@ -83,7 +83,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 - gsd-debugger agent ready for integration with orchestrator
-- Plan 13-02 will update /gsd:debug command to use thin orchestrator pattern
+- Plan 13-02 will update /rrr:debug command to use thin orchestrator pattern
 - Plan 13-03 will handle migration of deprecated files
 
 ---

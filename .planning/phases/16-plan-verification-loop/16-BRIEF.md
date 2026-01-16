@@ -97,7 +97,7 @@ New agent with plan verification expertise:
 - Returns structured issues or passed
 - ~400-600 lines (similar scope to gsd-verifier)
 
-### 2. Update `commands/gsd/plan-phase.md`
+### 2. Update `commands/rrr/plan-phase.md`
 
 Remove `context: fork` — orchestrator stays in main context.
 

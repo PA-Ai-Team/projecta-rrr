@@ -24,7 +24,7 @@ tech-stack:
 key-files:
   created: []
   modified:
-    - get-shit-done/workflows/execute-phase.md
+    - rrr/workflows/execute-phase.md
 
 key-decisions:
   - "Use frontmatter when present, fall back to inference for backward compat"
@@ -71,7 +71,7 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `get-shit-done/workflows/execute-phase.md` - Added frontmatter reading, updated categorization, updated wave calculation
+- `rrr/workflows/execute-phase.md` - Added frontmatter reading, updated categorization, updated wave calculation
 
 ## Decisions Made
 

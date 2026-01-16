@@ -22,8 +22,8 @@ score: 7/7 must-haves verified
 | 2 | Agent covers all 4 research modes | VERIFIED | `<research_modes>` section lines 71-157: ecosystem, feasibility, implementation, comparison |
 | 3 | Agent includes tool strategy | VERIFIED | `<tool_strategy>` section lines 159-268: Context7, WebFetch, WebSearch with verification protocol |
 | 4 | Agent includes source hierarchy and verification | VERIFIED | `<source_hierarchy>` lines 270-325, `<verification_protocol>` lines 327-432 |
-| 5 | /gsd:research-phase spawns gsd-researcher agent | VERIFIED | `commands/gsd/research-phase.md` lines 84, 117: `subagent_type="gsd-researcher"` |
-| 6 | /gsd:research-project spawns 4 parallel agents | VERIFIED | `commands/gsd/research-project.md` lines 70-84: 4 Task calls with `subagent_type="gsd-researcher"` |
+| 5 | /rrr:research-phase spawns gsd-researcher agent | VERIFIED | `commands/rrr/research-phase.md` lines 84, 117: `subagent_type="gsd-researcher"` |
+| 6 | /rrr:research-project spawns 4 parallel agents | VERIFIED | `commands/rrr/research-project.md` lines 70-84: 4 Task calls with `subagent_type="gsd-researcher"` |
 | 7 | Workflows deprecated with redirect to agent | VERIFIED | Both workflow files contain "DEPRECATED" notice pointing to `agents/gsd-researcher.md` |
 
 **Score:** 7/7 truths verified
@@ -33,12 +33,12 @@ score: 7/7 must-haves verified
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
 | `agents/gsd-researcher.md` | 600+ lines, contains research_modes | VERIFIED | 902 lines, all 10 sections present |
-| `commands/gsd/research-phase.md` | <200 lines, spawns agent | VERIFIED | 130 lines, references gsd-researcher 5 times |
-| `commands/gsd/research-project.md` | <200 lines, spawns 4 parallel | VERIFIED | 137 lines, 4 Task spawns with gsd-researcher |
-| `get-shit-done/workflows/research-phase.md` | DEPRECATED notice | VERIFIED | 17 lines, deprecation notice with redirect |
-| `get-shit-done/workflows/research-project.md` | DEPRECATED notice | VERIFIED | 23 lines, deprecation notice with redirect |
-| `get-shit-done/templates/research-subagent-prompt.md` | Context-only template | VERIFIED | 92 lines, context-passing template |
-| `get-shit-done/references/research-pitfalls.md` | DEPRECATED notice | VERIFIED | Deprecation header, original content preserved |
+| `commands/rrr/research-phase.md` | <200 lines, spawns agent | VERIFIED | 130 lines, references gsd-researcher 5 times |
+| `commands/rrr/research-project.md` | <200 lines, spawns 4 parallel | VERIFIED | 137 lines, 4 Task spawns with gsd-researcher |
+| `rrr/workflows/research-phase.md` | DEPRECATED notice | VERIFIED | 17 lines, deprecation notice with redirect |
+| `rrr/workflows/research-project.md` | DEPRECATED notice | VERIFIED | 23 lines, deprecation notice with redirect |
+| `rrr/templates/research-subagent-prompt.md` | Context-only template | VERIFIED | 92 lines, context-passing template |
+| `rrr/references/research-pitfalls.md` | DEPRECATED notice | VERIFIED | Deprecation header, original content preserved |
 
 ### Key Link Verification
 
@@ -52,8 +52,8 @@ score: 7/7 must-haves verified
 
 Phase 14 requirements from ROADMAP:
 - **Create gsd-researcher agent**: SATISFIED - 902 line agent with complete methodology
-- **Refactor /gsd:research-phase**: SATISFIED - 130 line thin orchestrator
-- **Refactor /gsd:research-project**: SATISFIED - 137 line parallel orchestrator
+- **Refactor /rrr:research-phase**: SATISFIED - 130 line thin orchestrator
+- **Refactor /rrr:research-project**: SATISFIED - 137 line parallel orchestrator
 
 ### Anti-Patterns Found
 
@@ -78,8 +78,8 @@ Phase 14 goal fully achieved:
    - research.md template (~160 lines)
 
 2. **Thin orchestrator pattern** applied to both research commands:
-   - `/gsd:research-phase`: 130 lines (down from ~530 combined)
-   - `/gsd:research-project`: 137 lines with parallel agent spawning
+   - `/rrr:research-phase`: 130 lines (down from ~530 combined)
+   - `/rrr:research-project`: 137 lines with parallel agent spawning
 
 3. **Deprecation notices** added to all superseded files with clear redirect to new agent location
 

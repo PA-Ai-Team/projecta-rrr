@@ -1,27 +1,27 @@
 <div align="center">
 
-# GET SHIT DONE
+# RRR
 
-**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code by TÂCHES.**
+**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code by Projecta.ai**
 
 **Solves context rot — the quality degradation that happens as Claude fills its context window.**
 
-[![npm version](https://img.shields.io/npm/v/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
-[![npm downloads](https://img.shields.io/npm/dm/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
+[![npm version](https://img.shields.io/npm/v/projecta-rrr?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/projecta-rrr)
+[![npm downloads](https://img.shields.io/npm/dm/projecta-rrr?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/projecta-rrr)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/glittercowboy/get-shit-done?style=for-the-badge&logo=github&color=181717)](https://github.com/glittercowboy/get-shit-done)
+[![GitHub stars](https://img.shields.io/github/stars/PA-Ai-Team/projecta-rrr?style=for-the-badge&logo=github&color=181717)](https://github.com/PA-Ai-Team/projecta-rrr)
 
 <br>
 
 ```bash
-npx get-shit-done-cc
+npx projecta-rrr
 ```
 
 **Works on Mac, Windows, and Linux.**
 
 <br>
 
-![GSD Install](assets/terminal.svg)
+![RRR Install](assets/terminal.svg)
 
 <br>
 
@@ -47,19 +47,19 @@ I'm a solo developer. I don't write code — Claude Code does.
 
 Other spec-driven development tools exist; BMAD, Speckit... But they all seem to make things way more complicated than they need to be (sprint ceremonies, story points, stakeholder syncs, retrospectives, Jira workflows) or lack real big picture understanding of what you're building. I'm not a 50-person software company. I don't want to play enterprise theater. I'm just a creative person trying to build great things that work.
 
-So I built GSD. The complexity is in the system, not in your workflow. Behind the scenes: context engineering, XML prompt formatting, subagent orchestration, state management. What you see: a few commands that just work.
+So I built RRR. The complexity is in the system, not in your workflow. Behind the scenes: context engineering, XML prompt formatting, subagent orchestration, state management. What you see: a few commands that just work.
 
 The system gives Claude everything it needs to do the work *and* verify it. I trust the workflow. It just does a good job.
 
 That's what this is. No enterprise roleplay bullshit. Just an incredibly effective system for building cool stuff consistently using Claude Code.
 
-— **TÂCHES**
+— **Projecta.ai**
 
 ---
 
 Vibecoding has a bad reputation. You describe what you want, AI generates code, and you get inconsistent garbage that falls apart at scale.
 
-GSD fixes that. It's the context engineering layer that makes Claude Code reliable. Describe your idea, let the system extract everything it needs to know, and let Claude Code get to work.
+RRR fixes that. It's the context engineering layer that makes Claude Code reliable. Describe your idea, let the system extract everything it needs to know, and let Claude Code get to work.
 
 ---
 
@@ -72,31 +72,31 @@ People who want to describe what they want and have it built correctly — witho
 ## Getting Started
 
 ```bash
-npx get-shit-done-cc
+npx projecta-rrr
 ```
 
-That's it. Verify with `/gsd:help` inside your Claude Code interface.
+That's it. Verify with `/rrr:help` inside your Claude Code interface.
 
 ### Staying Updated
 
-GSD evolves fast. Check for updates periodically:
+RRR evolves fast. Check for updates periodically:
 
 ```
-/gsd:whats-new
+/rrr:whats-new
 ```
 
 Update with:
 
 ```bash
-npx get-shit-done-cc@latest
+npx projecta-rrr@latest
 ```
 
 <details>
 <summary><strong>Non-interactive Install (Docker, CI, Scripts)</strong></summary>
 
 ```bash
-npx get-shit-done-cc --global   # Install to ~/.claude/
-npx get-shit-done-cc --local    # Install to ./.claude/
+npx projecta-rrr --global   # Install to ~/.claude/
+npx projecta-rrr --local    # Install to ./.claude/
 ```
 
 Use `--global` (`-g`) or `--local` (`-l`) to skip the interactive prompt.
@@ -109,8 +109,8 @@ Use `--global` (`-g`) or `--local` (`-l`) to skip the interactive prompt.
 Clone the repository and run the installer locally:
 
 ```bash
-git clone https://github.com/glittercowboy/get-shit-done.git
-cd get-shit-done
+git clone https://github.com/PA-Ai-Team/projecta-rrr.git
+cd projecta-rrr
 node bin/install.js --local
 ```
 
@@ -120,14 +120,14 @@ Installs to `./.claude/` for testing modifications before contributing.
 
 ### Recommended: Skip Permissions Mode
 
-GSD is designed for frictionless automation. Run Claude Code with:
+RRR is designed for frictionless automation. Run Claude Code with:
 
 ```bash
 claude --dangerously-skip-permissions
 ```
 
 > [!TIP]
-> This is how GSD is intended to be used — stopping to approve `date` and `git commit` 50 times defeats the purpose.
+> This is how RRR is intended to be used — stopping to approve `date` and `git commit` 50 times defeats the purpose.
 
 <details>
 <summary><strong>Alternative: Granular Permissions</strong></summary>
@@ -169,7 +169,7 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 ### 1. Initialize Project (~10 minutes)
 
 ```
-/gsd:new-project
+/rrr:new-project
 ```
 
 One command, one flow. The system:
@@ -186,8 +186,8 @@ You approve the roadmap. Now you're ready to build.
 ### 2. Plan Phase
 
 ```
-/gsd:discuss-phase 1   # Optional: clarify UI/UX/behavior decisions first
-/gsd:plan-phase 1
+/rrr:discuss-phase 1   # Optional: clarify UI/UX/behavior decisions first
+/rrr:plan-phase 1
 ```
 
 **discuss-phase** (optional) — If the phase has gray areas (UI choices, UX flows, behavior decisions), discuss them first. Creates `CONTEXT.md` that guides planning. Skip if you trust the system's defaults.
@@ -203,7 +203,7 @@ Ready when plans pass verification.
 ### 3. Execute Phase
 
 ```
-/gsd:execute-phase 1
+/rrr:execute-phase 1
 ```
 
 The system:
@@ -215,10 +215,10 @@ The system:
 ### 4. Repeat
 
 ```
-/gsd:plan-phase 2
-/gsd:execute-phase 2
+/rrr:plan-phase 2
+/rrr:execute-phase 2
 ...
-/gsd:complete-milestone   # When all phases done
+/rrr:complete-milestone   # When all phases done
 ```
 
 Loop plan → execute until milestone complete. Ship your MVP. Start next milestone.
@@ -232,7 +232,7 @@ Already have code? Start here instead.
 ### 1. Map the codebase
 
 ```
-/gsd:map-codebase
+/rrr:map-codebase
 ```
 
 Spawns parallel agents to analyze your code. Creates `.planning/codebase/` with structured analysis of your stack, architecture, conventions, and concerns.
@@ -240,7 +240,7 @@ Spawns parallel agents to analyze your code. Creates `.planning/codebase/` with 
 ### 2. Initialize and build
 
 ```
-/gsd:new-project
+/rrr:new-project
 ```
 
 Same flow as greenfield, but the system knows your codebase. Questions focus on what you're adding/changing. Then plan → execute as normal.
@@ -255,7 +255,7 @@ The codebase docs load automatically during planning. Claude knows your patterns
 
 Claude Code is incredibly powerful *if* you give it the context it needs. Most people don't.
 
-GSD handles it for you:
+RRR handles it for you:
 
 | File | What it does |
 |------|--------------|
@@ -294,13 +294,13 @@ Precise instructions. No guessing. Verification built in.
 
 As Claude fills its context window, quality degrades. You've seen it: *"Due to context limits, I'll be more concise now."* That "concision" is code for cutting corners.
 
-GSD prevents this. Each plan is maximum 3 tasks. Each plan runs in a fresh subagent — 200k tokens purely for implementation, zero accumulated garbage.
+RRR prevents this. Each plan is maximum 3 tasks. Each plan runs in a fresh subagent — 200k tokens purely for implementation, zero accumulated garbage.
 
 | Task | Context | Quality |
 |------|---------|---------|
-| Task 1 | Fresh | ✅ Full |
-| Task 2 | Fresh | ✅ Full |
-| Task 3 | Fresh | ✅ Full |
+| Task 1 | Fresh | Full |
+| Task 2 | Fresh | Full |
+| Task 3 | Fresh | Full |
 
 No degradation. Walk away, come back to completed work.
 
@@ -337,62 +337,60 @@ You're never locked in. The system adapts.
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:new-project` | Full initialization: questions → research → requirements → roadmap |
-| `/gsd:plan-phase [N]` | Research + plan + verify for a phase |
-| `/gsd:execute-phase <N>` | Execute all plans in parallel waves, verify when complete |
-| `/gsd:complete-milestone` | Ship it, prep next version |
+| `/rrr:new-project` | Full initialization: questions → research → requirements → roadmap |
+| `/rrr:plan-phase [N]` | Research + plan + verify for a phase |
+| `/rrr:execute-phase <N>` | Execute all plans in parallel waves, verify when complete |
+| `/rrr:complete-milestone` | Ship it, prep next version |
 
 ### Navigation
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:progress` | Where am I? What's next? |
-| `/gsd:help` | Show all commands and usage guide |
+| `/rrr:progress` | Where am I? What's next? |
+| `/rrr:help` | Show all commands and usage guide |
 
 ### Verification
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:verify-work [N]` | Manual user acceptance testing ¹ |
+| `/rrr:verify-work [N]` | Manual user acceptance testing |
 
 ### Brownfield
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:map-codebase` | Analyze existing codebase before new-project |
+| `/rrr:map-codebase` | Analyze existing codebase before new-project |
 
 ### Phase Management
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:add-phase` | Append phase to roadmap |
-| `/gsd:insert-phase [N]` | Insert urgent work between phases |
-| `/gsd:remove-phase [N]` | Remove future phase, renumber |
-| `/gsd:discuss-phase [N]` | Gather context before planning |
+| `/rrr:add-phase` | Append phase to roadmap |
+| `/rrr:insert-phase [N]` | Insert urgent work between phases |
+| `/rrr:remove-phase [N]` | Remove future phase, renumber |
+| `/rrr:discuss-phase [N]` | Gather context before planning |
 
 ### Milestones
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:new-milestone [name]` | Start next milestone |
-| `/gsd:discuss-milestone` | Gather context for next milestone |
+| `/rrr:new-milestone [name]` | Start next milestone |
+| `/rrr:discuss-milestone` | Gather context for next milestone |
 
 ### Session
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:pause-work` | Create handoff when stopping mid-phase |
-| `/gsd:resume-work` | Restore from last session |
+| `/rrr:pause-work` | Create handoff when stopping mid-phase |
+| `/rrr:resume-work` | Restore from last session |
 
 ### Utilities
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:add-todo [desc]` | Capture idea for later |
-| `/gsd:check-todos` | List pending todos |
-| `/gsd:debug [desc]` | Systematic debugging with persistent state |
-
-<sup>¹ Contributed by reddit user OracleGreyBeard</sup>
+| `/rrr:add-todo [desc]` | Capture idea for later |
+| `/rrr:check-todos` | List pending todos |
+| `/rrr:debug [desc]` | Systematic debugging with persistent state |
 
 ---
 
@@ -400,22 +398,22 @@ You're never locked in. The system adapts.
 
 **Commands not found after install?**
 - Restart Claude Code to reload slash commands
-- Verify files exist in `~/.claude/commands/gsd/` (global) or `./.claude/commands/gsd/` (local)
+- Verify files exist in `~/.claude/commands/rrr/` (global) or `./.claude/commands/rrr/` (local)
 
 **Commands not working as expected?**
-- Run `/gsd:help` to verify installation
-- Re-run `npx get-shit-done-cc` to reinstall
+- Run `/rrr:help` to verify installation
+- Re-run `npx projecta-rrr` to reinstall
 
 **Updating to the latest version?**
 ```bash
-npx get-shit-done-cc@latest
+npx projecta-rrr@latest
 ```
 
 **Using Docker or containerized environments?**
 
 If file reads fail with tilde paths (`~/.claude/...`), set `CLAUDE_CONFIG_DIR` before installing:
 ```bash
-CLAUDE_CONFIG_DIR=/home/youruser/.claude npx get-shit-done-cc --global
+CLAUDE_CONFIG_DIR=/home/youruser/.claude npx projecta-rrr --global
 ```
 This ensures absolute paths are used instead of `~` which may not expand correctly in containers.
 
@@ -423,11 +421,11 @@ This ensures absolute paths are used instead of `~` which may not expand correct
 
 ## Star History
 
-<a href="https://star-history.com/#glittercowboy/get-shit-done&Date">
+<a href="https://star-history.com/#PA-Ai-Team/projecta-rrr&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=glittercowboy/get-shit-done&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=glittercowboy/get-shit-done&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=glittercowboy/get-shit-done&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=PA-Ai-Team/projecta-rrr&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=PA-Ai-Team/projecta-rrr&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=PA-Ai-Team/projecta-rrr&type=Date" />
  </picture>
 </a>
 
@@ -441,6 +439,8 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Claude Code is powerful. GSD makes it reliable.**
+**Claude Code is powerful. RRR makes it reliable.**
+
+**Built by [Projecta.ai](https://projecta.ai)**
 
 </div>

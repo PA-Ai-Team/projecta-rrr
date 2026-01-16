@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude Code Statusline - GSD Edition
+# Claude Code Statusline - RRR Edition
 # Shows: model | current task | directory | context usage
 
 input=$(cat)
@@ -40,19 +40,19 @@ if [[ -f "$todo" ]]; then
     task=$(jq -r '.[] | select(.status=="in_progress") | .activeForm' "$todo" 2>/dev/null | head -1)
 fi
 
-# GSD update available?
-gsd_update=""
-if [[ -f "$HOME/.claude/cache/gsd-update-check.json" ]]; then
-    update_available=$(jq -r '.update_available' "$HOME/.claude/cache/gsd-update-check.json" 2>/dev/null)
+# RRR update available?
+rrr_update=""
+if [[ -f "$HOME/.claude/cache/rrr-update-check.json" ]]; then
+    update_available=$(jq -r '.update_available' "$HOME/.claude/cache/rrr-update-check.json" 2>/dev/null)
     if [[ "$update_available" == "true" ]]; then
-        gsd_update=$'\033[33m⬆ /gsd:update\033[0m │ '
+        rrr_update=$'\033[33m⬆ /rrr:update\033[0m │ '
     fi
 fi
 
 # Output
 dirname=$(basename "$dir")
 if [[ -n "$task" ]]; then
-    printf '%s\033[2m%s\033[0m │ \033[1m%s\033[0m │ \033[2m%s\033[0m%s' "$gsd_update" "$model" "$task" "$dirname" "$ctx"
+    printf '%s\033[2m%s\033[0m │ \033[1m%s\033[0m │ \033[2m%s\033[0m%s' "$rrr_update" "$model" "$task" "$dirname" "$ctx"
 else
-    printf '%s\033[2m%s\033[0m │ \033[2m%s\033[0m%s' "$gsd_update" "$model" "$dirname" "$ctx"
+    printf '%s\033[2m%s\033[0m │ \033[2m%s\033[0m%s' "$rrr_update" "$model" "$dirname" "$ctx"
 fi
