@@ -77,6 +77,13 @@ npx projecta-rrr
 
 That's it. Verify with `/rrr:help` inside your Claude Code interface.
 
+> **Installed from inside Claude Code?** Slash commands won't load until you restart:
+> 1. Type `exit` to quit Claude Code
+> 2. Run `claude` again
+> 3. Then run `/rrr:help`
+>
+> This resolves "Unknown skill: rrr:help" errors.
+
 ### Staying Updated
 
 RRR evolves fast. Check for updates periodically:
@@ -275,6 +282,14 @@ Plans that require human verification should include one of these markers:
 - `MANUAL_VERIFICATION`
 
 Pushpa Mode will skip these phases and record them in the report for manual follow-up.
+
+**Where to run Pushpa Mode:**
+- **Recommended:** Run in a normal system terminal (outside Claude Code) for true unattended overnight runs:
+  ```bash
+  bash scripts/pushpa-mode.sh
+  ```
+- Running inside Claude Code works but can trigger approval prompts ("Do you want to proceed?").
+- If the script detects Claude Code, it will prompt: `Continue running Pushpa Mode inside Claude Code? (y/N)` — default is **No** (recommended), so you can switch to an external terminal.
 
 ---
 
@@ -510,9 +525,10 @@ You're never locked in. The system adapts.
 
 ## Troubleshooting
 
-**Commands not found after install?**
-- Restart Claude Code to reload slash commands
+**Commands not found after install/update?**
+- Restart Claude Code: type `exit`, then run `claude` again
 - Verify files exist in `~/.claude/commands/rrr/` (global) or `./.claude/commands/rrr/` (local)
+- Still seeing "Unknown skill"? Reinstall with `npx projecta-rrr@latest`, then restart `claude`
 
 **Commands not working as expected?**
 - Run `/rrr:help` to verify installation

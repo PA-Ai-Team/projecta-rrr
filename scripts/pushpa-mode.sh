@@ -41,6 +41,61 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Claude Code Detection
+# ═══════════════════════════════════════════════════════════════════════════════
+
+detect_claude_code() {
+    # Check env vars first
+    if [ -n "${CLAUDE:-}" ] || [ -n "${CLAUDE_CODE:-}" ]; then
+        return 0  # Likely Claude Code
+    fi
+
+    # Check parent process name (best effort, non-fatal)
+    local parent_name=""
+    parent_name=$(ps -o comm= -p "$PPID" 2>/dev/null || echo "")
+    if echo "$parent_name" | grep -qi "claude"; then
+        return 0  # Likely Claude Code
+    fi
+
+    return 1  # Not Claude Code
+}
+
+check_claude_code_environment() {
+    if detect_claude_code; then
+        echo ""
+        echo -e "${YELLOW}════════════════════════════════════════════════════════════════${NC}"
+        echo -e "${YELLOW}  ⚠️  Pushpa Mode is running inside Claude Code.${NC}"
+        echo -e "${YELLOW}════════════════════════════════════════════════════════════════${NC}"
+        echo ""
+        echo "   This can trigger approval prompts (\"Do you want to proceed?\")"
+        echo "   and may not be fully unattended."
+        echo ""
+        echo -e "${GREEN}✅ Recommended for true overnight autonomy:${NC}"
+        echo "   Open a new system terminal (outside Claude Code) and run:"
+        echo -e "     ${CYAN}bash scripts/pushpa-mode.sh${NC}"
+        echo ""
+
+        read -r -p "Continue running Pushpa Mode inside Claude Code? (y/N): " response
+        if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            echo ""
+            echo "Exiting Pushpa Mode (recommended)."
+            echo "Run this outside Claude Code:"
+            echo -e "  ${CYAN}bash scripts/pushpa-mode.sh${NC}"
+            echo ""
+            exit 0
+        fi
+        echo ""
+        echo -e "${YELLOW}Continuing inside Claude Code (user confirmed)...${NC}"
+        echo ""
+    else
+        echo -e "${GREEN}✅ Pushpa Mode running in standard terminal (recommended).${NC}"
+    fi
+}
+
+# Run Claude Code check immediately
+check_claude_code_environment
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Logging
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -246,12 +301,23 @@ get_phases() {
 }
 
 # Check if phase has a plan
+# Supports both integer phases (7 → 07-*) and decimal phases (7.1 → 07.1-*)
 phase_has_plan() {
     local phase="$1"
-    local phase_padded=$(printf "%02d" "${phase%%.*}")
+    local phase_major="${phase%%.*}"
+    local phase_major_padded=$(printf "%02d" "$phase_major")
+
+    # For decimal phases (e.g., 7.1), build full padded pattern (07.1)
+    local search_pattern
+    if [[ "$phase" == *"."* ]]; then
+        local phase_full_padded="${phase_major_padded}.${phase#*.}"
+        search_pattern="*/${phase_full_padded}-*/*-PLAN.md"
+    else
+        search_pattern="*/${phase_major_padded}-*/*-PLAN.md"
+    fi
 
     # Look for plan files in the phase directory
-    local plan_files=$(find "$PHASES_DIR" -path "*/${phase_padded}*/*-PLAN.md" -type f 2>/dev/null | head -1)
+    local plan_files=$(find "$PHASES_DIR" -path "$search_pattern" -type f 2>/dev/null | head -1)
 
     if [ -n "$plan_files" ]; then
         return 0
@@ -260,11 +326,22 @@ phase_has_plan() {
 }
 
 # Get plan files for a phase
+# Supports both integer phases (7 → 07-*) and decimal phases (7.1 → 07.1-*)
 get_phase_plans() {
     local phase="$1"
-    local phase_padded=$(printf "%02d" "${phase%%.*}")
+    local phase_major="${phase%%.*}"
+    local phase_major_padded=$(printf "%02d" "$phase_major")
 
-    find "$PHASES_DIR" -path "*/${phase_padded}*/*-PLAN.md" -type f 2>/dev/null | sort
+    # For decimal phases (e.g., 7.1), build full padded pattern (07.1)
+    local search_pattern
+    if [[ "$phase" == *"."* ]]; then
+        local phase_full_padded="${phase_major_padded}.${phase#*.}"
+        search_pattern="*/${phase_full_padded}-*/*-PLAN.md"
+    else
+        search_pattern="*/${phase_major_padded}-*/*-PLAN.md"
+    fi
+
+    find "$PHASES_DIR" -path "$search_pattern" -type f 2>/dev/null | sort
 }
 
 # Check if phase plan contains HITL marker
@@ -289,13 +366,16 @@ phase_requires_hitl() {
 }
 
 # Check if milestone is complete
+# Only stops on strong, unambiguous markers (no false positives like "100%")
 is_milestone_complete() {
-    local completion_markers=("MVP COMPLETE" "MILESTONE COMPLETE" "ALL PHASES COMPLETE" "100%")
+    local completion_markers=("MVP COMPLETE" "MILESTONE COMPLETE" "MISSION_ACCOMPLISHED")
 
     for marker in "${completion_markers[@]}"; do
+        # Check STATE.md first (primary source of truth)
         if grep -qi "$marker" "$STATE_FILE" 2>/dev/null; then
             return 0
         fi
+        # Then check ROADMAP.md
         if grep -qi "$marker" "$ROADMAP_FILE" 2>/dev/null; then
             return 0
         fi

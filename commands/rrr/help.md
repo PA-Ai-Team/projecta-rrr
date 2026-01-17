@@ -23,6 +23,8 @@ Output ONLY the reference content below. Do NOT add:
 
 **After install/update:** If you installed from inside Claude Code, type `exit` and restart `claude` so it reloads commands.
 
+**Still seeing "Unknown skill"?** Reinstall with `npx projecta-rrr@latest`, then restart `claude` again.
+
 **Pick your start command:**
 
 | Scenario | Command |
@@ -415,6 +417,9 @@ Pushpa Mode will:
 - Skip phases marked with `HITL_REQUIRED: true`
 - Generate report at `.planning/PUSHPA_REPORT.md`
 - Log everything to `.planning/logs/`
+
+**Where to run:** Recommended outside Claude Code for true unattended runs.
+Running inside Claude Code may prompt for approvals; if prompted, type `y` to continue or exit and run in a normal terminal.
 
 **Bootstrap only (no planning):**
 
