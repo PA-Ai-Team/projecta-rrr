@@ -219,6 +219,63 @@ If you choose a non-default provider, RRR asks for a reason and records it in De
 
 These are allowed but require explicit justification: Firebase, Supabase, Auth0, Vercel, PlanetScale.
 
+### MCP Auto-Setup
+
+RRR includes an MCP registry that maps your selected providers to their MCP servers. After `/rrr:new-project` generates your `MVP_FEATURES.yml`:
+
+```bash
+npm run mcp:setup
+```
+
+This reads your feature selections and outputs the MCP configuration for Claude Code. Only MCPs you actually need get installed.
+
+| Feature | MCP Server |
+|---------|------------|
+| Database (Neon) | `@neondatabase/mcp-server-neon` |
+| Payments (Stripe) | `@stripe/mcp` |
+| Analytics (PostHog) | `@anthropic/mcp-posthog` |
+| Voice (Deepgram) | `@deepgram/mcp-server` |
+| Browser (Browserbase) | `@anthropic/mcp-browserbase` |
+| Sandbox (E2B) | `@e2b/mcp-server` |
+| Storage (R2) | `@cloudflare/mcp-server-r2` |
+
+**Always included:** Context7 (docs), GitHub, Filesystem, Sequential Thinking.
+
+### Pushpa Mode (Autopilot)
+
+Run phases overnight while you sleep. Pushpa Mode is an unattended runner that plans and executes phases sequentially, skipping any that require human verification.
+
+```bash
+bash scripts/pushpa-mode.sh
+# or
+npm run pushpa
+```
+
+**What it does:**
+1. Preflights required API keys based on your `MVP_FEATURES.yml`
+2. Iterates through phases in order
+3. Plans any phase that doesn't have a plan yet
+4. Executes phases automatically
+5. **Skips** phases marked with `HITL_REQUIRED: true` (human verification needed)
+6. Generates a morning report at `.planning/PUSHPA_REPORT.md`
+
+**Prerequisites:**
+- Run `/rrr:new-project` first (project must be initialized)
+- Set all required API keys (script will check and warn)
+- Recommend enabling YOLO mode in `.planning/config.json`
+
+**Where outputs live:**
+- Report: `.planning/PUSHPA_REPORT.md`
+- Logs: `.planning/logs/pushpa_*.log`
+
+**HITL Convention:**
+Plans that require human verification should include one of these markers:
+- `HITL_REQUIRED: true` (canonical)
+- `HUMAN_VERIFICATION_REQUIRED`
+- `MANUAL_VERIFICATION`
+
+Pushpa Mode will skip these phases and record them in the report for manual follow-up.
+
 ---
 
 ## How It Works

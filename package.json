@@ -1,16 +1,23 @@
 {
   "name": "projecta-rrr",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code by Projecta.ai",
   "bin": {
     "projecta-rrr": "bin/install.js"
+  },
+  "scripts": {
+    "mcp:setup": "bash scripts/mcp-setup.sh",
+    "pushpa": "bash scripts/pushpa-mode.sh"
   },
   "files": [
     "bin",
     "commands",
     "rrr",
     "agents",
-    "hooks"
+    "hooks",
+    "scripts",
+    "mcp.registry.json",
+    "projecta.defaults.json"
   ],
   "keywords": [
     "claude",

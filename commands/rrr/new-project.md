@@ -350,15 +350,17 @@ Use AskUserQuestion:
 - header: "Preset"
 - question: "Start with a use-case preset? This pre-configures capabilities."
 - options:
+  - "saas-dashboard (Recommended)" — SaaS with Clerk + Neon + optional Stripe (DEFAULT)
   - "landing-waitlist" — Landing page + email capture (no auth, no db)
-  - "saas-dashboard" — SaaS with Clerk + Neon + optional Stripe
   - "api-admin" — API backend + admin panel (Neon, optional auth)
   - "voice-agent" — Voice AI agent (Deepgram + full agent stack)
-  - "None" — Configure capabilities manually (Recommended for custom)
+  - "Custom" — Configure capabilities manually
 
 **If preset selected:** Load preset defaults, skip to Step 3 (confirm/override).
 
-**If "None":** Continue to Step 2.
+**If "Custom":** Continue to Step 2.
+
+**DEFAULT BEHAVIOR:** If user selects nothing or skips, assume `saas-dashboard` preset (Neon + Clerk + Render + optional Stripe).
 
 ### Step 2: Capability Questionnaire
 
@@ -496,6 +498,10 @@ Deviations: [count or "None"]
 
 File: .planning/MVP_FEATURES.yml
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 To configure MCP servers for your stack:
+   npm run mcp:setup
+   (Reads MVP_FEATURES.yml and installs required MCPs)
 ```
 
 Continue to Phase 3.
@@ -1271,6 +1277,16 @@ Present completion with next steps:
 `/rrr:plan-phase 1`
 
 <sub>`/clear` first → fresh context window</sub>
+
+───────────────────────────────────────────────────────────────
+
+## 🔌 MCP Setup (Optional)
+
+Configure Claude Code with MCP servers for your selected stack:
+
+`npm run mcp:setup`
+
+<sub>Reads MVP_FEATURES.yml and outputs MCP configuration</sub>
 
 ───────────────────────────────────────────────────────────────
 ```

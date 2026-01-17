@@ -19,6 +19,20 @@ Output ONLY the reference content below. Do NOT add:
 
 **RRR** creates hierarchical project plans optimized for solo agentic development with Claude Code. Built by [Projecta.ai](https://projecta.ai).
 
+## Getting Started
+
+**After install/update:** If you installed from inside Claude Code, type `exit` and restart `claude` so it reloads commands.
+
+**Pick your start command:**
+
+| Scenario | Command |
+|----------|---------|
+| New/empty folder (greenfield) | `/rrr:new-project` — bootstraps Next.js/TS baseline if folder is empty |
+| Existing repo (brownfield) | `/rrr:new-project` — brownfield-safe; won't overwrite your repo |
+| RRR already initialized | `/rrr:progress` — if `.planning/STATE.md` exists |
+
+**MVP Definition of Done at Projecta:** local demo runs + tests pass.
+
 ## Quick Start
 
 1. `/rrr:new-project` - Initialize project (includes research, requirements, roadmap)
@@ -380,6 +394,27 @@ Change anytime by editing `.planning/config.json`
 ```
 
 That's it! `/rrr:new-project` handles everything from bootstrap to roadmap.
+
+**Overnight mode: Pushpa Mode**
+
+Run phases unattended while you sleep:
+
+```
+bash scripts/pushpa-mode.sh
+# or
+npm run pushpa
+```
+
+Prerequisites:
+1. Run `/rrr:new-project` first
+2. Set all required API keys (based on your MVP_FEATURES.yml)
+3. Recommend enabling YOLO mode in config.json
+
+Pushpa Mode will:
+- Plan and execute phases sequentially
+- Skip phases marked with `HITL_REQUIRED: true`
+- Generate report at `.planning/PUSHPA_REPORT.md`
+- Log everything to `.planning/logs/`
 
 **Bootstrap only (no planning):**
 

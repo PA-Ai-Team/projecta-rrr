@@ -1,7 +1,9 @@
-# SaaS Dashboard Preset
+# SaaS Dashboard Preset (DEFAULT)
 # Auth + database required, payments optional
+# This is the Projecta default preset - used when user skips selection
 
 name: saas-dashboard
+default: true
 description: SaaS application with authentication, database, and optional payments
 
 stack:
@@ -69,6 +71,10 @@ database:
   tables:
     - users (synced from Clerk)
     - user_data (application-specific)
+
+# MCP servers auto-installed based on integrations
+mcp_servers:
+  - neon  # Required for database
 
 done_criteria:
   - User can sign up and sign in

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "MCP server registry - maps providers to their Claude MCP installation commands",
+  "version": "1.0.0",
+
+  "servers": {
+    "neon": {
+      "name": "Neon MCP Server",
+      "description": "PostgreSQL database operations via Neon",
+      "command": "npx -y @neondatabase/mcp-server-neon",
+      "envRequired": ["NEON_API_KEY"],
+      "featureKeys": ["db:neon", "database"],
+      "docs": "https://neon.tech/docs/ai/mcp"
+    },
+
+    "stripe": {
+      "name": "Stripe MCP Server",
+      "description": "Payment processing and subscription management",
+      "command": "npx -y @stripe/mcp",
+      "envRequired": ["STRIPE_SECRET_KEY"],
+      "featureKeys": ["payments:stripe", "payments"],
+      "docs": "https://docs.stripe.com/mcp"
+    },
+
+    "posthog": {
+      "name": "PostHog MCP Server",
+      "description": "Product analytics and feature flags",
+      "command": "npx -y @anthropic/mcp-posthog",
+      "envRequired": ["POSTHOG_API_KEY", "POSTHOG_PROJECT_ID"],
+      "featureKeys": ["analytics:posthog", "analytics"],
+      "docs": "https://posthog.com/docs/mcp"
+    },
+
+    "deepgram": {
+      "name": "Deepgram MCP Server",
+      "description": "Voice-to-text and text-to-speech",
+      "command": "npx -y @deepgram/mcp-server",
+      "envRequired": ["DEEPGRAM_API_KEY"],
+      "featureKeys": ["voice:deepgram", "voice"],
+      "docs": "https://developers.deepgram.com/docs/mcp"
+    },
+
+    "browserbase": {
+      "name": "Browserbase MCP Server",
+      "description": "Headless browser automation",
+      "command": "npx -y @anthropic/mcp-browserbase",
+      "envRequired": ["BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID"],
+      "featureKeys": ["browserAutomation:browserbase", "browser"],
+      "docs": "https://docs.browserbase.com/mcp"
+    },
+
+    "e2b": {
+      "name": "E2B MCP Server",
+      "description": "Code execution sandbox",
+      "command": "npx -y @e2b/mcp-server",
+      "envRequired": ["E2B_API_KEY"],
+      "featureKeys": ["sandbox:e2b", "sandbox"],
+      "docs": "https://e2b.dev/docs/mcp"
+    },
+
+    "cloudflare-r2": {
+      "name": "Cloudflare R2 MCP Server",
+      "description": "S3-compatible object storage",
+      "command": "npx -y @cloudflare/mcp-server-r2",
+      "envRequired": ["CLOUDFLARE_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"],
+      "featureKeys": ["objectStorage:r2", "storage"],
+      "docs": "https://developers.cloudflare.com/r2/mcp"
+    },
+
+    "context7": {
+      "name": "Context7 MCP Server",
+      "description": "Documentation lookup and library references",
+      "command": "npx -y @upstash/context7-mcp",
+      "envRequired": [],
+      "featureKeys": ["docs", "context"],
+      "docs": "https://context7.dev",
+      "alwaysInclude": true
+    },
+
+    "resend": {
+      "name": "Resend MCP Server",
+      "description": "Transactional email sending",
+      "command": "npx -y @resend/mcp-server",
+      "envRequired": ["RESEND_API_KEY"],
+      "featureKeys": ["email:resend", "email"],
+      "docs": "https://resend.com/docs/mcp"
+    },
+
+    "github": {
+      "name": "GitHub MCP Server",
+      "description": "GitHub repository operations",
+      "command": "npx -y @modelcontextprotocol/server-github",
+      "envRequired": ["GITHUB_PERSONAL_ACCESS_TOKEN"],
+      "featureKeys": ["github", "vcs"],
+      "docs": "https://modelcontextprotocol.io/docs/servers/github",
+      "alwaysInclude": true
+    },
+
+    "filesystem": {
+      "name": "Filesystem MCP Server",
+      "description": "Local filesystem operations",
+      "command": "npx -y @modelcontextprotocol/server-filesystem",
+      "envRequired": [],
+      "featureKeys": ["filesystem"],
+      "docs": "https://modelcontextprotocol.io/docs/servers/filesystem",
+      "alwaysInclude": true
+    },
+
+    "sequential-thinking": {
+      "name": "Sequential Thinking MCP Server",
+      "description": "Enhanced reasoning and chain-of-thought",
+      "command": "npx -y @modelcontextprotocol/server-sequential-thinking",
+      "envRequired": [],
+      "featureKeys": ["reasoning"],
+      "docs": "https://modelcontextprotocol.io/docs/servers/sequential-thinking",
+      "alwaysInclude": true
+    }
+  },
+
+  "presetMappings": {
+    "saas-dashboard": ["neon", "context7", "github", "filesystem", "sequential-thinking"],
+    "landing-waitlist": ["context7", "github", "filesystem", "sequential-thinking"],
+    "api-admin": ["neon", "context7", "github", "filesystem", "sequential-thinking"],
+    "voice-agent": ["neon", "deepgram", "e2b", "context7", "github", "filesystem", "sequential-thinking"]
+  },
+
+  "defaultServers": ["context7", "github", "filesystem", "sequential-thinking"]
+}

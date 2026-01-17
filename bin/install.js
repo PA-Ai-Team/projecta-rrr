@@ -301,7 +301,26 @@ function finishInstall(settingsPath, settings, statuslineCommand, notifyCommand,
   writeSettings(settingsPath, settings);
 
   console.log(`
-  ${green}Done!${reset} Launch Claude Code and run ${cyan}/rrr:help${reset}.
+  ${green}Done!${reset}
+
+  ${yellow}If you installed from inside Claude Code:${reset}
+  Type ${cyan}exit${reset} and restart ${cyan}claude${reset} so it reloads commands.
+
+  ${yellow}Pick your start command:${reset}
+
+  ${cyan}New/empty folder (greenfield)${reset}
+    /rrr:new-project
+    (bootstraps Next.js/TS baseline if folder is empty)
+
+  ${cyan}Existing repo (brownfield)${reset}
+    /rrr:new-project
+    (brownfield-safe; won't overwrite or restructure your repo)
+
+  ${cyan}RRR already initialized${reset}
+    /rrr:progress
+    (if .planning/STATE.md exists)
+
+  Run ${cyan}/rrr:help${reset} anytime to see all commands.
 `);
 }
 
