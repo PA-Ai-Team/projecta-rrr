@@ -52,7 +52,19 @@ Plan path: $ARGUMENTS
    - plan_number: `02`
    - plan_path: full path
 
-4. **Pre-execution summary (interactive mode only)**
+4. **Load skills for plan**
+   Before spawning executor, load skills based on plan frontmatter or inference:
+
+   a. Read plan frontmatter for `skills:` array
+   b. If empty, infer skills from plan content using registry rules
+   c. Always include default skill (`projecta.nextjs-typescript`) unless `skills_mode: minimal`
+   d. Load skill contents from `~/.claude/skills/` or `./.claude/skills/`
+   e. Respect limits: max 10 skills, max 1000 lines total
+   f. Log: `[RRR] Skills loaded: projecta.testing, projecta.visual-proof (185 lines)`
+
+   Skills are injected into executor prompt as `<skills>` block.
+
+5. **Pre-execution summary (interactive mode only)**
    Check config.json for mode. Skip this step if mode=yolo.
 
    Parse PLAN.md to extract:
@@ -81,11 +93,13 @@ Plan path: $ARGUMENTS
    ⚡ Executing {phase_number}-{plan_number}: {objective one-liner}
    ```
 
-5. **Spawn rrr-executor subagent**
+6. **Spawn rrr-executor subagent**
 
    ```
    Task(
      prompt="Execute plan at {plan_path}
+
+{skills_block}
 
 Plan: @{plan_path}
 Project state: @.planning/STATE.md
@@ -95,6 +109,8 @@ Config: @.planning/config.json (if exists)",
    )
    ```
 
+   Where `{skills_block}` is the `<skills>` content loaded in step 4, containing relevant skill SKILL.md files.
+
    The `rrr-executor` subagent has all execution logic baked in:
    - Deviation rules (auto-fix bugs, critical gaps, blockers; ask for architectural)
    - Checkpoint protocols (human-verify, decision, human-action)
@@ -102,11 +118,11 @@ Config: @.planning/config.json (if exists)",
    - Summary creation
    - State updates
 
-6. **Handle subagent return**
+7. **Handle subagent return**
    - If contains "## CHECKPOINT REACHED": Execute checkpoint_handling
    - If contains "## PLAN COMPLETE": Verify SUMMARY exists, report success
 
-7. **Report completion and offer next steps**
+8. **Report completion and offer next steps**
    - Show SUMMARY path
    - Show commits from subagent return
    - Route to next action (see `<offer_next>`)

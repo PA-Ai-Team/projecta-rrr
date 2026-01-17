@@ -392,6 +392,8 @@ depends_on: []              # Plan IDs this plan requires
 files_modified: []          # Files this plan touches
 autonomous: true            # false if plan has checkpoints
 user_setup: []              # Human-required setup (omit if empty)
+skills: []                  # Skills to load (auto-inferred if empty)
+skills_mode: normal         # "normal" (default) or "minimal" (skip default skill)
 
 must_haves:
   truths: []                # Observable behaviors
@@ -457,9 +459,46 @@ After completion, create `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
 | `files_modified` | Yes | Files this plan touches |
 | `autonomous` | Yes | `true` if no checkpoints, `false` if has checkpoints |
 | `user_setup` | No | Human-required setup items |
+| `skills` | No | Skills to load for execution (auto-inferred if empty) |
+| `skills_mode` | No | `normal` (default) or `minimal` (skip default skill) |
 | `must_haves` | Yes | Goal-backward verification criteria |
 
 **Wave is pre-computed:** Wave numbers are assigned during planning. Execute-phase reads `wave` directly from frontmatter and groups plans by wave number.
+
+## Skills Inference
+
+Skills load into executor context at plan execution time. **Default skill** (`projecta.nextjs-typescript`) loads automatically for ALL plans to ensure consistent stack conventions.
+
+**Inference rules** - when phase content mentions these patterns, include the skill:
+
+| Pattern Keywords | Skill |
+|------------------|-------|
+| test, vitest, playwright, e2e, unit test | `projecta.testing` |
+| visual, screenshot, artifact, proof | `projecta.visual-proof` |
+| R2, storage, S3, bucket, upload, cloudflare | `projecta.cloudflare-r2` |
+| PDF, document, pdf | `anthropic.pdf` |
+| spreadsheet, xlsx, excel | `anthropic.xlsx` |
+| MCP, Neon, Stripe, PostHog | `projecta.mcp-stack` |
+| shadcn, tailwind, button, card, dialog, ui component | `projecta.shadcn-ui` |
+| webapp, web app, browser test | `anthropic.webapp-testing` |
+
+**Explicit declaration** (when known):
+```yaml
+skills:
+  - projecta.testing
+  - projecta.visual-proof
+  - anthropic.webapp-testing
+```
+
+**Skip default skill** (rare, for non-standard stacks):
+```yaml
+skills_mode: minimal
+```
+
+**Limits:**
+- Max 10 skills per plan
+- Max 1000 total lines
+- Skills exceeding limits are skipped with warning
 
 ## Context Section Rules
 

@@ -615,6 +615,76 @@ You're never locked in. The system adapts.
 | `/rrr:check-todos` | List pending todos |
 | `/rrr:debug [desc]` | Systematic debugging with persistent state |
 
+### Skills
+
+| Command | What it does |
+|---------|--------------|
+| `/rrr:list-skills` | Show all available skills (vendored + community) |
+| `/rrr:install-skill [url]` | Install a skill from GitHub or skillsmp.com |
+| `/rrr:search-skills [query]` | Search for skills on skillsmp.com |
+
+---
+
+## Skills System
+
+Skills are context packages that load into Claude during plan execution. They enforce coding conventions, tool choices, and best practices.
+
+### How Skills Work
+
+1. **Planning** — Planner infers which skills are needed based on phase content
+2. **Execution** — Skills load into executor context (fresh per plan)
+3. **Enforcement** — Claude follows skill rules during implementation
+
+Skills are loaded dynamically per plan. No skill accumulation across plans — keeps context clean.
+
+### Vendored Skills
+
+Ships with RRR:
+
+**Projecta Skills (default stack):**
+- `projecta.nextjs-typescript` ⭐ — Next.js App Router + TypeScript conventions (loads automatically)
+- `projecta.testing` — Vitest + Playwright (NEVER Jest/Cypress)
+- `projecta.visual-proof` — Visual proof artifact capture
+- `projecta.shadcn-ui` — shadcn/ui components (NEVER Material UI/Chakra)
+- `projecta.cloudflare-r2` — Cloudflare R2 storage conventions
+- `projecta.mcp-stack` — MCP server integrations
+
+**Anthropic Skills (vendored from upstream):**
+- `anthropic.pdf` — PDF document handling
+- `anthropic.xlsx` — Excel spreadsheet handling
+- `anthropic.webapp-testing` — Web application testing
+- And 13 more...
+
+### Using Skills in Plans
+
+Skills are auto-inferred from plan content, but you can declare them explicitly:
+
+```yaml
+---
+phase: 04-auth
+plan: 01
+skills:
+  - projecta.testing
+  - projecta.visual-proof
+  - anthropic.webapp-testing
+---
+```
+
+**Default skill:** `projecta.nextjs-typescript` loads automatically for ALL plans. Add `skills_mode: minimal` to skip it (rare, for non-standard stacks).
+
+**Limits:** Max 10 skills per plan, max 1000 total lines.
+
+### Community Skills
+
+Install skills from GitHub or skillsmp.com:
+
+```
+/rrr:install-skill https://github.com/user/repo/blob/main/SKILL.md
+/rrr:search-skills react patterns
+```
+
+Community skills install to `.claude/skills/community/`.
+
 ---
 
 ## Troubleshooting

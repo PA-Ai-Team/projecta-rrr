@@ -320,6 +320,37 @@ List pending todos and select one to work on.
 Usage: `/rrr:check-todos`
 Usage: `/rrr:check-todos api`
 
+### Skills Management
+
+**`/rrr:list-skills`**
+List all available skills (vendored and community).
+
+- Shows Projecta skills (default stack)
+- Shows Anthropic skills (vendored from upstream)
+- Shows community skills (user-installed)
+- Includes tags, descriptions, and usage
+
+Usage: `/rrr:list-skills`
+
+**`/rrr:install-skill <url-or-name>`**
+Install a skill from GitHub or skillsmp.com marketplace.
+
+- Fetches SKILL.md from source
+- Validates format
+- Saves to `.claude/skills/community/`
+- Updates local registry
+
+Usage: `/rrr:install-skill https://github.com/user/repo/blob/main/SKILL.md`
+Usage: `/rrr:install-skill my-skill-name`
+
+**`/rrr:search-skills <query>`**
+Search for skills on skillsmp.com marketplace.
+
+- Returns top 10 results with descriptions and stars
+- Offers to install selected skill
+
+Usage: `/rrr:search-skills react patterns`
+
 ### Utility Commands
 
 **`/rrr:help`**
@@ -355,6 +386,8 @@ Usage: `/rrr:whats-new`
 │   └── done/             # Completed todos
 ├── debug/                # Active debug sessions
 │   └── resolved/         # Archived resolved issues
+├── logs/                 # Execution logs
+│   └── skills_*.log      # Skills loading logs
 ├── codebase/             # Codebase map (brownfield projects)
 │   ├── STACK.md          # Languages, frameworks, dependencies
 │   ├── ARCHITECTURE.md   # Patterns, layers, data flow
@@ -506,6 +539,51 @@ Artifacts:
 # ... investigation happens, context fills up ...
 /clear
 /rrr:debug                                    # Resume from where you left off
+```
+
+**Using skills:**
+
+Skills load automatically based on plan content. To list available skills:
+
+```
+/rrr:list-skills                              # Show all vendored + community skills
+```
+
+To install community skills:
+
+```
+/rrr:search-skills react patterns             # Search marketplace
+/rrr:install-skill https://github.com/...     # Install from GitHub
+```
+
+Skills are declared in PLAN.md frontmatter (auto-inferred if not specified):
+
+```yaml
+---
+skills:
+  - projecta.testing
+  - projecta.visual-proof
+---
+```
+
+## Skills Directory
+
+```
+~/.claude/skills/                   # Global install
+├── registry.json                   # Skill metadata + resolution
+├── projecta/                       # Projecta custom skills
+│   ├── testing-vitest-playwright/
+│   ├── visual-proof/
+│   ├── cloudflare-r2/
+│   ├── nextjs-typescript/          # Default skill (always loads)
+│   ├── shadcn-ui/
+│   └── mcp-stack/
+├── upstream/anthropic/             # Vendored Anthropic skills
+│   ├── pdf/
+│   ├── xlsx/
+│   └── ...
+└── community/                      # User-installed skills
+    └── (empty until /rrr:install-skill)
 ```
 
 ## Getting Help

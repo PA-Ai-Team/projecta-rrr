@@ -159,6 +159,28 @@ function writeSettings(settingsPath, settings) {
 }
 
 /**
+ * Count skill directories in a given directory (looks for SKILL.md files)
+ */
+function countSkillsInDir(dir) {
+  if (!fs.existsSync(dir)) return 0;
+  let count = 0;
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const skillFile = path.join(dir, entry.name, 'SKILL.md');
+        if (fs.existsSync(skillFile)) {
+          count++;
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore errors
+  }
+  return count;
+}
+
+/**
  * Recursively copy directory, replacing paths in .md files
  */
 function copyWithPathReplacement(srcDir, destDir, pathPrefix) {
@@ -345,6 +367,20 @@ function install(isGlobal) {
     const agentsDest = path.join(claudeDir, 'agents');
     copyWithPathReplacement(agentsSrc, agentsDest, pathPrefix);
     console.log(`  ${green}✓${reset} Installed agents`);
+  }
+
+  // Copy skills to ~/.claude/skills (skills system)
+  const skillsSrc = path.join(src, 'rrr', 'skills');
+  if (fs.existsSync(skillsSrc)) {
+    const skillsDest = path.join(claudeDir, 'skills');
+    copyWithPathReplacement(skillsSrc, skillsDest, pathPrefix);
+    // Count skills by category
+    const projectaCount = countSkillsInDir(path.join(skillsSrc, 'projecta'));
+    const anthropicCount = countSkillsInDir(path.join(skillsSrc, 'upstream', 'anthropic'));
+    console.log(`  ${green}✓${reset} Installed skills/projecta (${projectaCount} skills)`);
+    if (anthropicCount > 0) {
+      console.log(`  ${green}✓${reset} Installed skills/upstream/anthropic (${anthropicCount} skills)`);
+    }
   }
 
   // Copy CHANGELOG.md

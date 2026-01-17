@@ -1,0 +1,180 @@
+{
+  "version": "1.0.0",
+  "skills": {
+    "anthropic.algorithmic-art": {
+      "path": "upstream/anthropic/algorithmic-art/SKILL.md",
+      "tags": ["art", "generative", "canvas"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.brand-guidelines": {
+      "path": "upstream/anthropic/brand-guidelines/SKILL.md",
+      "tags": ["design", "branding", "guidelines"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.canvas-design": {
+      "path": "upstream/anthropic/canvas-design/SKILL.md",
+      "tags": ["design", "canvas", "graphics"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.doc-coauthoring": {
+      "path": "upstream/anthropic/doc-coauthoring/SKILL.md",
+      "tags": ["documents", "writing", "collaboration"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.docx": {
+      "path": "upstream/anthropic/docx/SKILL.md",
+      "tags": ["documents", "word", "office"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.frontend-design": {
+      "path": "upstream/anthropic/frontend-design/SKILL.md",
+      "tags": ["design", "frontend", "ui"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.internal-comms": {
+      "path": "upstream/anthropic/internal-comms/SKILL.md",
+      "tags": ["communication", "internal", "writing"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.mcp-builder": {
+      "path": "upstream/anthropic/mcp-builder/SKILL.md",
+      "tags": ["mcp", "tools", "integration"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.pdf": {
+      "path": "upstream/anthropic/pdf/SKILL.md",
+      "tags": ["documents", "pdf"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.pptx": {
+      "path": "upstream/anthropic/pptx/SKILL.md",
+      "tags": ["documents", "presentations", "office"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.skill-creator": {
+      "path": "upstream/anthropic/skill-creator/SKILL.md",
+      "tags": ["skills", "meta", "creation"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.slack-gif-creator": {
+      "path": "upstream/anthropic/slack-gif-creator/SKILL.md",
+      "tags": ["slack", "gif", "animation"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.theme-factory": {
+      "path": "upstream/anthropic/theme-factory/SKILL.md",
+      "tags": ["design", "themes", "styling"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.web-artifacts-builder": {
+      "path": "upstream/anthropic/web-artifacts-builder/SKILL.md",
+      "tags": ["web", "artifacts", "builder"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.webapp-testing": {
+      "path": "upstream/anthropic/webapp-testing/SKILL.md",
+      "tags": ["testing", "webapp", "e2e"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "anthropic.xlsx": {
+      "path": "upstream/anthropic/xlsx/SKILL.md",
+      "tags": ["documents", "spreadsheets", "excel"],
+      "max_lines": 150,
+      "vendored": true
+    },
+    "projecta.testing": {
+      "path": "projecta/testing-vitest-playwright/SKILL.md",
+      "tags": ["testing", "vitest", "playwright"],
+      "max_lines": 120,
+      "vendored": true
+    },
+    "projecta.visual-proof": {
+      "path": "projecta/visual-proof/SKILL.md",
+      "tags": ["testing", "playwright", "artifacts"],
+      "max_lines": 100,
+      "vendored": true
+    },
+    "projecta.cloudflare-r2": {
+      "path": "projecta/cloudflare-r2/SKILL.md",
+      "tags": ["storage", "r2", "cloudflare"],
+      "max_lines": 80,
+      "vendored": true
+    },
+    "projecta.nextjs-typescript": {
+      "path": "projecta/nextjs-typescript/SKILL.md",
+      "tags": ["framework", "nextjs", "typescript"],
+      "max_lines": 100,
+      "vendored": true
+    },
+    "projecta.shadcn-ui": {
+      "path": "projecta/shadcn-ui/SKILL.md",
+      "tags": ["ui", "shadcn", "tailwind"],
+      "max_lines": 80,
+      "vendored": true
+    },
+    "projecta.mcp-stack": {
+      "path": "projecta/mcp-stack/SKILL.md",
+      "tags": ["mcp", "integrations"],
+      "max_lines": 120,
+      "vendored": true
+    }
+  },
+  "inference": {
+    "rules": [
+      {
+        "patterns": ["test", "vitest", "playwright", "e2e", "unit test"],
+        "skill": "projecta.testing"
+      },
+      {
+        "patterns": ["visual", "screenshot", "artifact", "proof"],
+        "skill": "projecta.visual-proof"
+      },
+      {
+        "patterns": ["R2", "storage", "S3", "bucket", "upload", "cloudflare"],
+        "skill": "projecta.cloudflare-r2"
+      },
+      {
+        "patterns": ["PDF", "document", "pdf"],
+        "skill": "anthropic.pdf"
+      },
+      {
+        "patterns": ["spreadsheet", "xlsx", "excel"],
+        "skill": "anthropic.xlsx"
+      },
+      {
+        "patterns": ["MCP", "Neon", "Stripe", "PostHog"],
+        "skill": "projecta.mcp-stack"
+      },
+      {
+        "patterns": ["shadcn", "tailwind", "button", "card", "dialog", "ui component"],
+        "skill": "projecta.shadcn-ui"
+      },
+      {
+        "patterns": ["webapp", "web app", "browser test"],
+        "skill": "anthropic.webapp-testing"
+      }
+    ]
+  },
+  "limits": {
+    "max_skills_per_plan": 10,
+    "max_total_lines": 1000
+  },
+  "defaults": {
+    "always_load": ["projecta.nextjs-typescript"]
+  }
+}

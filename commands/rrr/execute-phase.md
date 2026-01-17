@@ -51,18 +51,27 @@ Phase: $ARGUMENTS
    - Group plans by wave number
    - Report wave structure to user
 
-4. **Execute waves**
+4. **Load skills for plans**
+   Before executing, load skills for each plan:
+   - Read plan frontmatter for `skills:` array
+   - If empty, infer from plan content using registry inference rules
+   - Always include default skill (`projecta.nextjs-typescript`) unless `skills_mode: minimal`
+   - Load skill contents from `~/.claude/skills/` or `./.claude/skills/`
+   - Log: `[RRR] Skills for {plan}: {skills} ({lines} lines)`
+
+5. **Execute waves**
    For each wave in order:
+   - For each plan, inject `<skills>` block into executor prompt
    - Spawn `rrr-executor` for each plan in wave (parallel Task calls)
    - Wait for completion (Task blocks)
    - Verify SUMMARYs created
    - Proceed to next wave
 
-5. **Aggregate results**
+6. **Aggregate results**
    - Collect summaries from all plans
    - Report phase completion status
 
-6. **Run visual proof** (if Playwright tests exist)
+7. **Run visual proof** (if Playwright tests exist)
    - Check for e2e/*.spec.ts files
    - If tests exist, run `bash scripts/visual-proof.sh`
    - Results appended to `.planning/VISUAL_PROOF.md`
@@ -70,19 +79,19 @@ Phase: $ARGUMENTS
    - Artifacts stored in `.planning/artifacts/playwright/`
    - Visual proof failure does NOT block phase completion (logged as warning)
 
-7. **Verify phase goal**
+8. **Verify phase goal**
    - Spawn `rrr-verifier` subagent with phase directory and goal
    - Verifier checks must_haves against actual codebase (not SUMMARY claims)
    - Creates VERIFICATION.md with detailed report
    - Route by status:
-     - `passed` → continue to step 8
+     - `passed` → continue to step 9
      - `human_needed` → present items, get approval or feedback
      - `gaps_found` → present gaps, offer `/rrr:plan-phase {X} --gaps`
 
-8. **Update roadmap and state**
+9. **Update roadmap and state**
    - Update ROADMAP.md, STATE.md
 
-9. **Update requirements**
+10. **Update requirements**
    Mark phase requirements as Complete:
    - Read ROADMAP.md, find this phase's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
    - Read REQUIREMENTS.md traceability table
@@ -90,14 +99,14 @@ Phase: $ARGUMENTS
    - Write updated REQUIREMENTS.md
    - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
 
-10. **Commit phase completion**
+11. **Commit phase completion**
     Bundle all phase metadata updates in one commit:
     - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
     - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
     - Stage VISUAL_PROOF.md if updated: `git add .planning/VISUAL_PROOF.md`
     - Commit: `docs({phase}): complete {phase-name} phase`
 
-11. **Offer next steps**
+12. **Offer next steps**
     - Route to next action (see `<offer_next>`)
 </process>
 
@@ -227,13 +236,16 @@ After user runs `/rrr:plan-phase {Z} --gaps`:
 <wave_execution>
 **Parallel spawning:**
 
-Spawn all plans in a wave with a single message containing multiple Task calls:
+Spawn all plans in a wave with a single message containing multiple Task calls.
+Include the `<skills>` block loaded in step 4 for each plan:
 
 ```
-Task(prompt="Execute plan at {plan_01_path}\n\nPlan: @{plan_01_path}\nProject state: @.planning/STATE.md", subagent_type="rrr-executor")
-Task(prompt="Execute plan at {plan_02_path}\n\nPlan: @{plan_02_path}\nProject state: @.planning/STATE.md", subagent_type="rrr-executor")
-Task(prompt="Execute plan at {plan_03_path}\n\nPlan: @{plan_03_path}\nProject state: @.planning/STATE.md", subagent_type="rrr-executor")
+Task(prompt="Execute plan at {plan_01_path}\n\n{skills_01_block}\n\nPlan: @{plan_01_path}\nProject state: @.planning/STATE.md", subagent_type="rrr-executor")
+Task(prompt="Execute plan at {plan_02_path}\n\n{skills_02_block}\n\nPlan: @{plan_02_path}\nProject state: @.planning/STATE.md", subagent_type="rrr-executor")
+Task(prompt="Execute plan at {plan_03_path}\n\n{skills_03_block}\n\nPlan: @{plan_03_path}\nProject state: @.planning/STATE.md", subagent_type="rrr-executor")
 ```
+
+Where `{skills_XX_block}` is the `<skills>` content containing skill SKILL.md files specific to that plan.
 
 All three run in parallel. Task tool blocks until all complete.
 
