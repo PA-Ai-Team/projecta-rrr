@@ -201,7 +201,7 @@ function installScripts(targetDir) {
 
   const installed = [];
   const skipped = [];
-  const scripts = ['pushpa-mode.sh', 'mcp-setup.sh'];
+  const scripts = ['pushpa-mode.sh', 'mcp-setup.sh', 'visual-proof.sh'];
 
   for (const script of scripts) {
     const srcFile = path.join(srcScriptsDir, script);
@@ -276,6 +276,18 @@ function addNpmScripts(targetDir, installedScripts) {
       pkgJson.scripts['mcp:setup'] = 'bash scripts/mcp-setup.sh';
       added.push('mcp:setup');
       console.log(`  ${green}✓${reset} Added npm script "mcp:setup"`);
+    }
+  }
+
+  // Add visual:proof script if visual-proof.sh was installed
+  if (installedScripts.includes('visual-proof.sh') || fs.existsSync(path.join(targetDir, 'scripts', 'visual-proof.sh'))) {
+    if (pkgJson.scripts['visual:proof']) {
+      skipped.push('visual:proof');
+      console.log(`  ${yellow}⚠${reset} Skipped npm script "visual:proof" (already exists)`);
+    } else {
+      pkgJson.scripts['visual:proof'] = 'bash scripts/visual-proof.sh';
+      added.push('visual:proof');
+      console.log(`  ${green}✓${reset} Added npm script "visual:proof"`);
     }
   }
 

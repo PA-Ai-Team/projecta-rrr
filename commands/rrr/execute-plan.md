@@ -151,9 +151,23 @@ Project context:
 ```
 
 Handle verification result:
-- **If passed:** Continue to Step 2.6 (update requirements)
+- **If passed:** Continue to Step 2.55 (visual proof)
 - **If gaps_found:** Create fix plans, execute them, re-verify (max 3 cycles)
 - **If human_needed:** Present items to user, collect response
+
+**Step 2.55: Run visual proof (only when verification passes)**
+
+When phase verification passes and e2e tests exist:
+
+1. Check for `e2e/*.spec.ts` files
+2. If tests exist, run `bash scripts/visual-proof.sh`
+3. Results appended to `.planning/VISUAL_PROOF.md`
+4. UX telemetry captured (console errors, page errors, network failures)
+5. Artifacts stored in `.planning/artifacts/playwright/`
+
+**Visual proof failure does NOT block phase completion** — logged as warning only.
+
+Continue to Step 2.6.
 
 **Step 2.6: Update requirements (only when verification passes)**
 
@@ -395,6 +409,7 @@ Continue handling returns until "## PLAN COMPLETE" or user stops.
 - [ ] Plan executed (SUMMARY.md created)
 - [ ] All checkpoints handled
 - [ ] If phase complete: Phase goal verified (rrr-verifier spawned, VERIFICATION.md created)
+- [ ] If phase complete: Visual proof run (if e2e tests exist)
 - [ ] If phase complete: REQUIREMENTS.md updated (phase requirements marked Complete)
 - [ ] User informed of completion and next steps
 </success_criteria>

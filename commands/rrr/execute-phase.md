@@ -62,19 +62,27 @@ Phase: $ARGUMENTS
    - Collect summaries from all plans
    - Report phase completion status
 
-6. **Verify phase goal**
+6. **Run visual proof** (if Playwright tests exist)
+   - Check for e2e/*.spec.ts files
+   - If tests exist, run `bash scripts/visual-proof.sh`
+   - Results appended to `.planning/VISUAL_PROOF.md`
+   - UX telemetry (console errors, page errors, network failures) captured
+   - Artifacts stored in `.planning/artifacts/playwright/`
+   - Visual proof failure does NOT block phase completion (logged as warning)
+
+7. **Verify phase goal**
    - Spawn `rrr-verifier` subagent with phase directory and goal
    - Verifier checks must_haves against actual codebase (not SUMMARY claims)
    - Creates VERIFICATION.md with detailed report
    - Route by status:
-     - `passed` → continue to step 7
+     - `passed` → continue to step 8
      - `human_needed` → present items, get approval or feedback
      - `gaps_found` → present gaps, offer `/rrr:plan-phase {X} --gaps`
 
-7. **Update roadmap and state**
+8. **Update roadmap and state**
    - Update ROADMAP.md, STATE.md
 
-8. **Update requirements**
+9. **Update requirements**
    Mark phase requirements as Complete:
    - Read ROADMAP.md, find this phase's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
    - Read REQUIREMENTS.md traceability table
@@ -82,13 +90,14 @@ Phase: $ARGUMENTS
    - Write updated REQUIREMENTS.md
    - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
 
-9. **Commit phase completion**
-   Bundle all phase metadata updates in one commit:
-   - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
-   - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
-   - Commit: `docs({phase}): complete {phase-name} phase`
+10. **Commit phase completion**
+    Bundle all phase metadata updates in one commit:
+    - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
+    - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
+    - Stage VISUAL_PROOF.md if updated: `git add .planning/VISUAL_PROOF.md`
+    - Commit: `docs({phase}): complete {phase-name} phase`
 
-10. **Offer next steps**
+11. **Offer next steps**
     - Route to next action (see `<offer_next>`)
 </process>
 
@@ -285,6 +294,8 @@ After all plans in phase complete (step 7):
 <success_criteria>
 - [ ] All incomplete plans in phase executed
 - [ ] Each plan has SUMMARY.md
+- [ ] Visual proof run (if e2e tests exist)
+- [ ] VISUAL_PROOF.md updated with run results
 - [ ] Phase goal verified (must_haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] STATE.md reflects phase completion

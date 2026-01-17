@@ -210,10 +210,20 @@ Display stage banner:
      forbidOnly: !!process.env.CI,
      retries: process.env.CI ? 2 : 0,
      workers: process.env.CI ? 1 : undefined,
-     reporter: 'html',
+
+     // Visual Proof: Artifact output directories
+     outputDir: '.planning/artifacts/playwright/test-results',
+     reporter: [
+       ['html', { outputFolder: '.planning/artifacts/playwright/report' }],
+       ['list']
+     ],
+
      use: {
        baseURL: 'http://localhost:3000',
+       // Visual Proof: Capture artifacts on failure
        trace: 'on-first-retry',
+       screenshot: 'only-on-failure',
+       video: 'retain-on-failure',
      },
      projects: [
        {
@@ -249,14 +259,137 @@ Display stage banner:
    })
    ```
 
-4. **Add e2e script to package.json:**
+4. **Add e2e and visual proof scripts to package.json:**
 
    Edit `package.json` to add:
    ```json
    "scripts": {
      "e2e": "playwright test",
-     "e2e:ui": "playwright test --ui"
+     "e2e:headed": "playwright test --headed",
+     "e2e:ui": "playwright test --ui",
+     "visual:open": "playwright show-report .planning/artifacts/playwright/report"
    }
+   ```
+
+5. **Create UX telemetry fixture:**
+
+   Create `e2e/fixtures/ux-telemetry.ts`:
+   ```typescript
+   import { test as base, Page, ConsoleMessage, Request, Response } from '@playwright/test'
+   import * as fs from 'fs'
+   import * as path from 'path'
+
+   interface UXTelemetry {
+     consoleErrors: { message: string; type: string; timestamp: number }[]
+     consoleWarnings: { message: string; type: string; timestamp: number }[]
+     pageErrors: { message: string; timestamp: number }[]
+     networkFailures: { url: string; status: number; method: string; timestamp: number }[]
+     runId: string
+   }
+
+   export const test = base.extend<{ uxTelemetry: UXTelemetry }>({
+     uxTelemetry: async ({ page }, use, testInfo) => {
+       const runId = `${Date.now()}-${testInfo.testId.replace(/[^a-zA-Z0-9]/g, '-')}`
+       const telemetry: UXTelemetry = {
+         consoleErrors: [],
+         consoleWarnings: [],
+         pageErrors: [],
+         networkFailures: [],
+         runId,
+       }
+
+       // Capture console errors and warnings
+       page.on('console', (msg: ConsoleMessage) => {
+         const type = msg.type()
+         if (type === 'error') {
+           telemetry.consoleErrors.push({
+             message: msg.text(),
+             type,
+             timestamp: Date.now(),
+           })
+         } else if (type === 'warning') {
+           telemetry.consoleWarnings.push({
+             message: msg.text(),
+             type,
+             timestamp: Date.now(),
+           })
+         }
+       })
+
+       // Capture page errors
+       page.on('pageerror', (error: Error) => {
+         telemetry.pageErrors.push({
+           message: error.message,
+           timestamp: Date.now(),
+         })
+       })
+
+       // Capture failed requests and 4xx/5xx responses
+       page.on('requestfailed', (request: Request) => {
+         telemetry.networkFailures.push({
+           url: request.url(),
+           status: 0,
+           method: request.method(),
+           timestamp: Date.now(),
+         })
+       })
+
+       page.on('response', (response: Response) => {
+         if (response.status() >= 400) {
+           telemetry.networkFailures.push({
+             url: response.url(),
+             status: response.status(),
+             method: response.request().method(),
+             timestamp: Date.now(),
+           })
+         }
+       })
+
+       await use(telemetry)
+
+       // Write telemetry after test
+       const artifactsDir = path.join(process.cwd(), '.planning/artifacts/ux-telemetry', runId)
+       fs.mkdirSync(artifactsDir, { recursive: true })
+
+       // Write JSONL logs
+       const events = [
+         ...telemetry.consoleErrors.map(e => ({ type: 'console_error', ...e })),
+         ...telemetry.consoleWarnings.map(e => ({ type: 'console_warning', ...e })),
+         ...telemetry.pageErrors.map(e => ({ type: 'page_error', ...e })),
+         ...telemetry.networkFailures.map(e => ({ type: 'network_failure', ...e })),
+       ].sort((a, b) => a.timestamp - b.timestamp)
+
+       if (events.length > 0) {
+         const jsonlPath = path.join(artifactsDir, 'events.jsonl')
+         fs.writeFileSync(jsonlPath, events.map(e => JSON.stringify(e)).join('\n'))
+       }
+
+       // Write summary
+       const summary = {
+         runId,
+         testTitle: testInfo.title,
+         testFile: testInfo.file,
+         status: testInfo.status,
+         duration: testInfo.duration,
+         counts: {
+           consoleErrors: telemetry.consoleErrors.length,
+           consoleWarnings: telemetry.consoleWarnings.length,
+           pageErrors: telemetry.pageErrors.length,
+           networkFailures: telemetry.networkFailures.length,
+         },
+         timestamp: new Date().toISOString(),
+       }
+       fs.writeFileSync(path.join(artifactsDir, 'summary.json'), JSON.stringify(summary, null, 2))
+     },
+   })
+
+   export { expect } from '@playwright/test'
+   ```
+
+6. **Update gitignore for artifacts:**
+
+   ```bash
+   echo -e "\n# Visual Proof artifacts\n.planning/artifacts/" >> .gitignore
    ```
 
 ## Phase 6: Create Environment Template
@@ -389,6 +522,8 @@ Present completion:
   npm run dev        Start dev server
   npm test           Run unit tests
   npm run e2e        Run e2e tests
+  npm run e2e:headed Run e2e with browser visible
+  npm run visual:open Open visual proof report
 
 ───────────────────────────────────────────────────────────────
 
@@ -412,8 +547,9 @@ Files created:
 - `vitest.config.ts`
 - `src/test/setup.ts`
 - `src/app/page.test.tsx` (smoke unit test)
-- `playwright.config.ts`
+- `playwright.config.ts` (configured for .planning/artifacts/)
 - `e2e/home.spec.ts` (smoke e2e test)
+- `e2e/fixtures/ux-telemetry.ts` (UX telemetry fixture)
 - `.env.example`
 
 </output>
@@ -428,8 +564,10 @@ Files created:
 - [ ] Homepage shows Button component
 - [ ] Vitest configured with Testing Library
 - [ ] Smoke unit test passes (npm test)
-- [ ] Playwright configured
+- [ ] Playwright configured with artifact output to .planning/artifacts/
+- [ ] UX telemetry fixture created (e2e/fixtures/ux-telemetry.ts)
 - [ ] Smoke e2e test passes (npm run e2e)
+- [ ] npm scripts include e2e:headed and visual:open
 - [ ] .env.example created with MVP placeholders
 - [ ] Dev server starts successfully
 - [ ] All files committed with message "chore: bootstrap nextjs mvp"

@@ -250,7 +250,7 @@ This reads your feature selections and outputs the MCP configuration for Claude 
 
 ### Pushpa Mode (Autopilot)
 
-Run phases overnight while you sleep. Pushpa Mode is an unattended runner that plans and executes phases sequentially, skipping any that require human verification.
+Run phases overnight while you sleep. Pushpa Mode is an unattended runner that plans and executes phases sequentially, with token-safe budgets and persistent state.
 
 **After running `npx projecta-rrr`, Pushpa Mode is automatically installed:**
 - `scripts/pushpa-mode.sh` — the runner script
@@ -268,7 +268,39 @@ npm run pushpa
 3. Plans any phase that doesn't have a plan yet
 4. Executes phases automatically
 5. **Skips** phases marked with `HITL_REQUIRED: true` (human verification needed)
-6. Generates a morning report at `.planning/PUSHPA_REPORT.md`
+6. Runs visual proof (Playwright tests) after each phase
+7. Generates a morning report at `.planning/PUSHPA_REPORT.md`
+
+**Token-Safe Budgets:**
+
+Pushpa Mode enforces hard limits to prevent runaway token consumption. Override via environment variables:
+
+| Budget | Default | Env Var |
+|--------|---------|---------|
+| Max phases per run | 3 | `MAX_PHASES_PER_RUN` |
+| Max total minutes | 180 | `MAX_TOTAL_MINUTES` |
+| Max RRR calls | 25 | `MAX_TOTAL_RRR_CALLS` |
+| Max plan attempts per phase | 2 | `MAX_PLAN_ATTEMPTS_PER_PHASE` |
+| Max exec attempts per phase | 2 | `MAX_EXEC_ATTEMPTS_PER_PHASE` |
+| Max consecutive failures | 3 | `MAX_CONSECUTIVE_FAILURES` |
+| Max same failure repeats | 2 | `MAX_SAME_FAILURE_REPEAT` |
+| Backoff between retries | 10s | `BACKOFF_SECONDS` |
+
+**Persistent Ledger:**
+
+State survives crashes and restarts. The ledger at `.planning/pushpa/ledger.json` tracks:
+- Phases started/completed
+- Call counts and timing
+- Failure history with signatures
+- Resume point for interrupted runs
+
+**Stop Conditions:**
+
+Pushpa Mode automatically stops when:
+- Budget exceeded (phases, time, or calls)
+- Same failure repeats (prevents infinite retry loops)
+- Git conflicts detected
+- Required env vars missing
 
 **Prerequisites:**
 - Run `/rrr:new-project` first (project must be initialized)
@@ -282,6 +314,7 @@ npm run pushpa
 **Where outputs live:**
 - Report: `.planning/PUSHPA_REPORT.md`
 - Logs: `.planning/logs/pushpa_*.log`
+- Ledger: `.planning/pushpa/ledger.json`
 
 **HITL Convention:**
 Plans that require human verification should include one of these markers:
@@ -298,6 +331,59 @@ Pushpa Mode will skip these phases and record them in the report for manual foll
   ```
 - Running inside Claude Code works but can trigger approval prompts ("Do you want to proceed?").
 - The script detects if it's running inside Claude Code and prompts: `Continue running Pushpa Mode inside Claude Code? (y/N)` — default is **No**. Press Enter to exit with instructions to run externally.
+
+### Visual Proof (Automated UX Verification)
+
+RRR includes automated visual proof via Playwright tests and UX telemetry capture.
+
+**What it captures:**
+- Playwright test results (pass/fail)
+- Console errors and warnings
+- Page errors (uncaught exceptions)
+- Network failures (4xx, 5xx, failed requests)
+- Screenshots, traces, and videos (on failure)
+
+**Modes** (configured in `.planning/config.json`):
+
+| Mode | Behavior |
+|------|----------|
+| `playwright` | Headless Playwright tests (default) |
+| `playwright_headed` | Headed if TTY available |
+| `hybrid` | Headless first, prompt for interactive fallback on eligible failures |
+| `interactive_only` | Skip Playwright, show manual UAT checklist |
+
+**Artifacts location:**
+- Report: `.planning/artifacts/playwright/report/`
+- Test results: `.planning/artifacts/playwright/test-results/`
+- UX telemetry: `.planning/artifacts/ux-telemetry/`
+- Run log: `.planning/VISUAL_PROOF.md` (append-only)
+
+**Commands:**
+```bash
+npm run e2e              # Run Playwright tests
+npm run e2e:headed       # Run with browser visible
+npm run e2e:ui           # Playwright UI mode
+npm run visual:open      # Open last HTML report
+bash scripts/visual-proof.sh  # Full visual proof runner
+```
+
+**Integration:**
+- Runs automatically after `/rrr:execute-phase` (if e2e tests exist)
+- Runs in Pushpa Mode (headless only, never interactive)
+- Results logged to `.planning/VISUAL_PROOF.md`
+
+**UX Telemetry Fixture:**
+
+Bootstrap includes a telemetry fixture at `e2e/fixtures/ux-telemetry.ts`. Import it in your tests to capture browser events automatically:
+
+```typescript
+import { test } from '../fixtures/ux-telemetry';
+
+test('my test', async ({ page }) => {
+  // Console errors, page errors, and network failures
+  // are automatically captured during this test
+});
+```
 
 ---
 

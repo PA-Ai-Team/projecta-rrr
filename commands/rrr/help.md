@@ -342,7 +342,14 @@ Usage: `/rrr:whats-new`
 ├── PROJECT.md            # Project vision
 ├── ROADMAP.md            # Current phase breakdown
 ├── STATE.md              # Project memory & context
+├── VISUAL_PROOF.md       # Visual proof run log (append-only)
 ├── config.json           # Workflow mode & gates
+├── artifacts/            # Build & test artifacts
+│   └── playwright/       # Playwright test output
+│       ├── report/       # HTML report
+│       └── test-results/ # Screenshots, traces, videos
+├── pushpa/               # Pushpa Mode state
+│   └── ledger.json       # Persistent run state
 ├── todos/                # Captured ideas and tasks
 │   ├── pending/          # Todos waiting to be worked on
 │   └── done/             # Completed todos
@@ -399,7 +406,7 @@ That's it! `/rrr:new-project` handles everything from bootstrap to roadmap.
 
 **Overnight mode: Pushpa Mode**
 
-Run phases unattended while you sleep. After `npx projecta-rrr`, these are automatically installed:
+Run phases unattended while you sleep with token-safe budgets. After `npx projecta-rrr`:
 
 ```
 bash scripts/pushpa-mode.sh
@@ -419,11 +426,42 @@ MVP_FEATURES.yml locations (checked in order):
 Pushpa Mode will:
 - Plan and execute phases sequentially
 - Skip phases marked with `HITL_REQUIRED: true`
+- Run visual proof (Playwright) after each phase
+- Enforce budgets (max phases, time, calls)
+- Stop on repeated failures (prevents infinite loops)
 - Generate report at `.planning/PUSHPA_REPORT.md`
-- Log everything to `.planning/logs/`
+- Persist state to `.planning/pushpa/ledger.json`
+
+**Budgets (override via env vars):**
+- `MAX_PHASES_PER_RUN=3` — phases per run
+- `MAX_TOTAL_MINUTES=180` — total runtime
+- `MAX_TOTAL_RRR_CALLS=25` — Claude calls
+- `MAX_CONSECUTIVE_FAILURES=3` — failures before stop
 
 **Where to run:** Recommended outside Claude Code for true unattended runs.
 The script detects if running inside Claude Code and prompts: `Continue running inside Claude Code? (y/N)`. Default is **No** — press Enter to exit with instructions to run externally.
+
+**Visual Proof (automated after phase execution)**
+
+Playwright tests + UX telemetry run automatically after `/rrr:execute-phase`:
+
+```
+npm run e2e              # Run tests
+npm run e2e:headed       # Headed mode
+npm run e2e:ui           # Playwright UI
+npm run visual:open      # Open report
+```
+
+Modes (in `.planning/config.json`):
+- `playwright` — headless (default)
+- `playwright_headed` — headed if TTY
+- `hybrid` — headless first, prompt for interactive on failure
+- `interactive_only` — skip Playwright, show manual checklist
+
+Artifacts:
+- `.planning/artifacts/playwright/report/` — HTML report
+- `.planning/artifacts/playwright/test-results/` — screenshots, videos, traces
+- `.planning/VISUAL_PROOF.md` — append-only run log
 
 **Bootstrap only (no planning):**
 

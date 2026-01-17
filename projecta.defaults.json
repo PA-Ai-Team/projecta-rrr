@@ -10,6 +10,15 @@
     "unit": "vitest",
     "e2e": "playwright"
   },
+  "visual_proof": {
+    "mode": "playwright",
+    "fallback_to_interactive": false,
+    "playwright": {
+      "headed_when_tty": false,
+      "grep": "@e2e",
+      "artifacts_dir": ".planning/artifacts"
+    }
+  },
   "preferredProviders": {
     "db": ["neon"],
     "auth": ["clerk", "neon-auth"],

@@ -705,7 +705,31 @@ questions: [
 ]
 ```
 
-Create `.planning/config.json` with chosen mode, depth, and parallelization.
+Create `.planning/config.json` with all settings:
+
+```json
+{
+  "workflow": {
+    "mode": "[yolo | interactive]",
+    "depth": "[quick | standard | comprehensive]",
+    "skip_checkpoints": [true | false based on mode]
+  },
+  "parallelization": {
+    "enabled": [true | false],
+    "max_concurrent_agents": 3,
+    "min_plans_for_parallel": 2
+  },
+  "visual_proof": {
+    "mode": "playwright",
+    "fallback_to_interactive": false,
+    "playwright": {
+      "headed_when_tty": false,
+      "grep": "@e2e",
+      "artifacts_dir": ".planning/artifacts"
+    }
+  }
+}
+```
 
 **Commit config.json:**
 
