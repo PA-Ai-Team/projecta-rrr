@@ -16,7 +16,7 @@
     "authDefault": "clerk",
     "deploy": ["render"],
     "payments": ["stripe"],
-    "objectStorage": ["r2"],
+    "objectStorage": ["cloudflare_r2"],
     "analytics": ["posthog"],
     "voice": ["deepgram"],
     "agents": ["mastra"],

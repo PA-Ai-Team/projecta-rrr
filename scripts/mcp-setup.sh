@@ -126,12 +126,24 @@ if [ -f "$FEATURES_FILE" ]; then
         fi
     fi
 
-    # Object storage
+    # Object storage (Cloudflare R2)
+    # Normalize: r2 -> cloudflare_r2 for backward compatibility
     if grep -q "objectStorage:" "$FEATURES_FILE" 2>/dev/null; then
         STORAGE=$(grep "objectStorage:" "$FEATURES_FILE" | cut -d: -f2 | tr -d ' ')
-        if [ "$STORAGE" = "r2" ]; then
-            if [[ ! " ${MCP_SERVERS[*]} " =~ " cloudflare-r2 " ]]; then
-                MCP_SERVERS+=("cloudflare-r2")
+        # Treat both "r2" and "cloudflare_r2" as Cloudflare R2
+        if [ "$STORAGE" = "r2" ] || [ "$STORAGE" = "cloudflare_r2" ]; then
+            if [[ ! " ${MCP_SERVERS[*]} " =~ " cloudflare_r2 " ]]; then
+                MCP_SERVERS+=("cloudflare_r2")
+            fi
+        fi
+    fi
+    # Also check object_storage (snake_case variant)
+    if grep -q "object_storage:" "$FEATURES_FILE" 2>/dev/null; then
+        STORAGE=$(grep "object_storage:" "$FEATURES_FILE" | cut -d: -f2 | tr -d ' ')
+        # Treat both "r2" and "cloudflare_r2" as Cloudflare R2
+        if [ "$STORAGE" = "r2" ] || [ "$STORAGE" = "cloudflare_r2" ]; then
+            if [[ ! " ${MCP_SERVERS[*]} " =~ " cloudflare_r2 " ]]; then
+                MCP_SERVERS+=("cloudflare_r2")
             fi
         fi
     fi

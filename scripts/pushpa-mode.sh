@@ -6,9 +6,13 @@
 # Usage: bash scripts/pushpa-mode.sh
 #
 # Requirements:
-# - MVP_FEATURES.yml must exist (.planning/MVP_FEATURES.yml)
+# - MVP_FEATURES.yml must exist (./MVP_FEATURES.yml or .planning/MVP_FEATURES.yml)
 # - Required API keys must be set based on your feature selections
 # - Claude Code must be installed and configured
+# - Project must be initialized (.planning/STATE.md or .planning/ROADMAP.md)
+#
+# Note: If running inside Claude Code, you'll be prompted to confirm.
+# For true unattended overnight runs, use a system terminal (outside Claude Code).
 #
 
 set -euo pipefail
@@ -20,10 +24,18 @@ set -euo pipefail
 PLANNING_DIR=".planning"
 PHASES_DIR="$PLANNING_DIR/phases"
 LOGS_DIR="$PLANNING_DIR/logs"
-FEATURES_FILE="$PLANNING_DIR/MVP_FEATURES.yml"
 STATE_FILE="$PLANNING_DIR/STATE.md"
 ROADMAP_FILE="$PLANNING_DIR/ROADMAP.md"
 REPORT_FILE="$PLANNING_DIR/PUSHPA_REPORT.md"
+
+# MVP_FEATURES.yml path resolution
+# Prefer repo root, fallback to .planning/
+FEATURES_FILE=""
+if [ -f "./MVP_FEATURES.yml" ]; then
+    FEATURES_FILE="./MVP_FEATURES.yml"
+elif [ -f "$PLANNING_DIR/MVP_FEATURES.yml" ]; then
+    FEATURES_FILE="$PLANNING_DIR/MVP_FEATURES.yml"
+fi
 
 # HITL markers that indicate human verification required
 HITL_MARKERS=("HITL_REQUIRED: true" "HUMAN_VERIFICATION_REQUIRED" "MANUAL_VERIFICATION")
@@ -45,9 +57,14 @@ NC='\033[0m'
 # ═══════════════════════════════════════════════════════════════════════════════
 
 detect_claude_code() {
-    # Check env vars first
-    if [ -n "${CLAUDE:-}" ] || [ -n "${CLAUDE_CODE:-}" ]; then
+    # Check env vars first (multiple heuristics)
+    if [ -n "${CLAUDE:-}" ] || [ -n "${CLAUDE_CODE:-}" ] || [ -n "${ANTHROPIC:-}" ]; then
         return 0  # Likely Claude Code
+    fi
+
+    # Check for CLAUDE_CONFIG_DIR or other Claude-related env vars
+    if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
+        return 0  # Likely Claude Code environment
     fi
 
     # Check parent process name (best effort, non-fatal)
@@ -55,6 +72,30 @@ detect_claude_code() {
     parent_name=$(ps -o comm= -p "$PPID" 2>/dev/null || echo "")
     if echo "$parent_name" | grep -qi "claude"; then
         return 0  # Likely Claude Code
+    fi
+
+    # Check grandparent process too (Claude may spawn intermediate shells)
+    local grandparent_pid=""
+    grandparent_pid=$(ps -o ppid= -p "$PPID" 2>/dev/null | tr -d ' ' || echo "")
+    if [ -n "$grandparent_pid" ] && [ "$grandparent_pid" != "1" ]; then
+        local grandparent_name=""
+        grandparent_name=$(ps -o comm= -p "$grandparent_pid" 2>/dev/null || echo "")
+        if echo "$grandparent_name" | grep -qi "claude"; then
+            return 0  # Likely Claude Code
+        fi
+    fi
+
+    # Check TERM_PROGRAM for VS Code with Claude extension
+    if [ "${TERM_PROGRAM:-}" = "vscode" ]; then
+        # VS Code terminal could be Claude Code - check for additional hints
+        if [ -n "${VSCODE_GIT_IPC_HANDLE:-}" ]; then
+            # Check if we have any Claude-related process in our ancestry
+            local ps_output=""
+            ps_output=$(ps -e 2>/dev/null | grep -i "claude" || echo "")
+            if [ -n "$ps_output" ]; then
+                return 0  # VS Code with Claude process running
+            fi
+        fi
     fi
 
     return 1  # Not Claude Code
@@ -161,13 +202,17 @@ check_claude_installed() {
 }
 
 check_mvp_features() {
-    if [ ! -f "$FEATURES_FILE" ]; then
+    if [ -z "$FEATURES_FILE" ] || [ ! -f "$FEATURES_FILE" ]; then
         echo ""
         echo -e "${RED}═══════════════════════════════════════════════════════════════${NC}"
         echo -e "${RED}  ERROR: MVP_FEATURES.yml not found${NC}"
         echo -e "${RED}═══════════════════════════════════════════════════════════════${NC}"
         echo ""
         echo "Pushpa Mode requires a configured project with feature selections."
+        echo ""
+        echo "Looked for:"
+        echo -e "  ${CYAN}./MVP_FEATURES.yml${NC} (preferred)"
+        echo -e "  ${CYAN}./.planning/MVP_FEATURES.yml${NC} (legacy)"
         echo ""
         echo "To get started:"
         echo "  1. Run: /rrr:new-project"
@@ -177,7 +222,7 @@ check_mvp_features() {
         echo ""
         exit 1
     fi
-    log OK "MVP_FEATURES.yml found"
+    log OK "MVP_FEATURES.yml found at $FEATURES_FILE"
 }
 
 check_planning_exists() {
@@ -186,13 +231,31 @@ check_planning_exists() {
         return 1
     fi
 
-    if [ ! -f "$ROADMAP_FILE" ]; then
-        log WARN "No ROADMAP.md found"
-        return 1
+    # Consider initialized if STATE.md OR ROADMAP.md exists
+    local has_state=false
+    local has_roadmap=false
+
+    if [ -f "$STATE_FILE" ]; then
+        has_state=true
     fi
 
-    log OK "Planning directory and roadmap found"
-    return 0
+    if [ -f "$ROADMAP_FILE" ]; then
+        has_roadmap=true
+    fi
+
+    if [ "$has_state" = true ] || [ "$has_roadmap" = true ]; then
+        if [ "$has_state" = true ] && [ "$has_roadmap" = true ]; then
+            log OK "Planning directory, STATE.md, and ROADMAP.md found"
+        elif [ "$has_state" = true ]; then
+            log OK "Planning directory and STATE.md found"
+        else
+            log OK "Planning directory and ROADMAP.md found"
+        fi
+        return 0
+    fi
+
+    log WARN "Neither STATE.md nor ROADMAP.md found"
+    return 1
 }
 
 # Check required environment variables based on MVP_FEATURES.yml
@@ -220,8 +283,9 @@ check_env_vars() {
         [ -z "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" ] && missing_vars+=("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (optional)")
     fi
 
-    # Cloudflare R2 (storage)
-    if echo "$features_content" | grep -q "object_storage:.*r2\|objectStorage:.*r2"; then
+    # Cloudflare R2 (object storage)
+    # Matches: cloudflare_r2, r2 (backward compat), object_storage:r2, objectStorage:r2
+    if echo "$features_content" | grep -qE "object_storage:.*cloudflare_r2|object_storage:.*r2|objectStorage:.*cloudflare_r2|objectStorage:.*r2"; then
         [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] && missing_vars+=("CLOUDFLARE_ACCOUNT_ID")
         [ -z "${R2_ACCESS_KEY_ID:-}" ] && missing_vars+=("R2_ACCESS_KEY_ID")
         [ -z "${R2_SECRET_ACCESS_KEY:-}" ] && missing_vars+=("R2_SECRET_ACCESS_KEY")
@@ -590,16 +654,23 @@ main() {
 
     # Check if planning exists, run new-project if not
     if ! check_planning_exists; then
-        log WARN "Planning not initialized. Running /rrr:new-project..."
+        log WARN "Project not initialized."
         echo ""
-        echo -e "${YELLOW}Planning not found. Please run /rrr:new-project first.${NC}"
+        echo -e "${YELLOW}════════════════════════════════════════════════════════════════${NC}"
+        echo -e "${YELLOW}  Project not initialized. Run /rrr:new-project first.${NC}"
+        echo -e "${YELLOW}════════════════════════════════════════════════════════════════${NC}"
         echo ""
-        echo "Pushpa Mode requires:"
-        echo "  1. .planning/ROADMAP.md (phases defined)"
-        echo "  2. .planning/MVP_FEATURES.yml (feature selections)"
+        echo "Pushpa Mode requires an initialized project with:"
+        echo -e "  • ${CYAN}.planning/STATE.md${NC} or ${CYAN}.planning/ROADMAP.md${NC} (planning files)"
+        echo -e "  • ${CYAN}MVP_FEATURES.yml${NC} (feature selections)"
         echo ""
-        echo "Run /rrr:new-project interactively to set up your project,"
-        echo "then run Pushpa Mode again."
+        echo -e "${GREEN}To initialize:${NC}"
+        echo "  1. Open a Claude Code session"
+        echo "  2. Run: /rrr:new-project"
+        echo "  3. Complete the questionnaire"
+        echo "  4. Set required API keys"
+        echo "  5. Run: bash scripts/pushpa-mode.sh"
+        echo ""
         exit 1
     fi
 

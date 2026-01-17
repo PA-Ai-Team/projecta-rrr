@@ -399,7 +399,7 @@ That's it! `/rrr:new-project` handles everything from bootstrap to roadmap.
 
 **Overnight mode: Pushpa Mode**
 
-Run phases unattended while you sleep:
+Run phases unattended while you sleep. After `npx projecta-rrr`, these are automatically installed:
 
 ```
 bash scripts/pushpa-mode.sh
@@ -412,6 +412,10 @@ Prerequisites:
 2. Set all required API keys (based on your MVP_FEATURES.yml)
 3. Recommend enabling YOLO mode in config.json
 
+MVP_FEATURES.yml locations (checked in order):
+- `./MVP_FEATURES.yml` (preferred, repo root)
+- `./.planning/MVP_FEATURES.yml` (legacy)
+
 Pushpa Mode will:
 - Plan and execute phases sequentially
 - Skip phases marked with `HITL_REQUIRED: true`
@@ -419,7 +423,7 @@ Pushpa Mode will:
 - Log everything to `.planning/logs/`
 
 **Where to run:** Recommended outside Claude Code for true unattended runs.
-Running inside Claude Code may prompt for approvals; if prompted, type `y` to continue or exit and run in a normal terminal.
+The script detects if running inside Claude Code and prompts: `Continue running inside Claude Code? (y/N)`. Default is **No** — press Enter to exit with instructions to run externally.
 
 **Bootstrap only (no planning):**
 

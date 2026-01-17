@@ -58,13 +58,15 @@
       "docs": "https://e2b.dev/docs/mcp"
     },
 
-    "cloudflare-r2": {
+    "cloudflare_r2": {
       "name": "Cloudflare R2 MCP Server",
-      "description": "S3-compatible object storage",
+      "description": "S3-compatible object storage (Cloudflare R2)",
       "command": "npx -y @cloudflare/mcp-server-r2",
       "envRequired": ["CLOUDFLARE_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"],
-      "featureKeys": ["objectStorage:r2", "storage"],
-      "docs": "https://developers.cloudflare.com/r2/mcp"
+      "envOptional": ["R2_BUCKET_NAME", "R2_PUBLIC_BASE_URL"],
+      "featureKeys": ["objectStorage:cloudflare_r2", "objectStorage:r2", "object_storage:cloudflare_r2", "object_storage:r2", "storage"],
+      "docs": "https://developers.cloudflare.com/r2/mcp",
+      "notes": "Cloudflare R2 is S3-compatible but uses Cloudflare credentials + endpoint; do not set AWS_REGION or use s3.amazonaws.com endpoints."
     },
 
     "context7": {

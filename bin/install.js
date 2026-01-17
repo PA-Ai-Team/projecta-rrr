@@ -16,13 +16,50 @@ const reset = '\x1b[0m';
 // Get version from package.json
 const pkg = require('../package.json');
 
-const banner = `
-${yellow}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃  ██▀▀█ ██▀▀█ ██▀▀█   ${reset}${dim}v${pkg.version}${reset}${yellow}                ┃
-┃  █▀█▀  █▀█▀  █▀█▀    ${reset}Projecta.ai${yellow}           ┃
-┃  ▀  ▀▀ ▀  ▀▀ ▀  ▀▀                         ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${reset}
+/**
+ * Render banner with TTY-aware formatting
+ * - Boxed ASCII banner for TTY with sufficient width
+ * - Plain text fallback for non-TTY or narrow terminals
+ */
+function renderBanner({ name, version, org, tagline }) {
+  const isTTY = process.stdout.isTTY;
+  const columns = process.stdout.columns || 80;
+  const useBox = isTTY && columns >= 50;
+
+  if (useBox) {
+    // Boxed banner with ASCII borders (no Unicode box-drawing)
+    const boxWidth = Math.min(46, columns - 4);
+    const innerWidth = boxWidth - 4; // Account for "| " and " |"
+
+    const pad = (str, len) => str + ' '.repeat(Math.max(0, len - str.length));
+    const line1 = `${name} v${version}`;
+    const line2 = org;
+    const line3 = tagline;
+
+    const border = '+' + '-'.repeat(boxWidth - 2) + '+';
+
+    return `
+${yellow}${border}
+|  ${reset}${line1}${yellow}${' '.repeat(Math.max(0, innerWidth - line1.length))}  |
+|  ${reset}${line2}${yellow}${' '.repeat(Math.max(0, innerWidth - line2.length))}  |
+|  ${reset}${dim}${line3}${reset}${yellow}${' '.repeat(Math.max(0, innerWidth - line3.length))}  |
+${border}${reset}
 `;
+  } else {
+    // Plain banner for non-TTY or narrow terminals
+    return `
+${name} v${version} - ${org}
+${tagline}
+`;
+  }
+}
+
+const banner = renderBanner({
+  name: 'RRR',
+  version: pkg.version,
+  org: 'Projecta.ai',
+  tagline: 'Spec-driven development for Claude Code'
+});
 
 // Parse args
 const args = process.argv.slice(2);
@@ -147,6 +184,110 @@ function copyWithPathReplacement(srcDir, destDir, pathPrefix) {
 }
 
 /**
+ * Install scripts to target project (for Pushpa Mode and MCP setup)
+ */
+function installScripts(targetDir) {
+  const src = path.join(__dirname, '..');
+  const scriptsDir = path.join(targetDir, 'scripts');
+  const srcScriptsDir = path.join(src, 'scripts');
+
+  // Check if source scripts directory exists
+  if (!fs.existsSync(srcScriptsDir)) {
+    return { installed: [], skipped: [] };
+  }
+
+  // Create scripts directory in target if needed
+  fs.mkdirSync(scriptsDir, { recursive: true });
+
+  const installed = [];
+  const skipped = [];
+  const scripts = ['pushpa-mode.sh', 'mcp-setup.sh'];
+
+  for (const script of scripts) {
+    const srcFile = path.join(srcScriptsDir, script);
+    const destFile = path.join(scriptsDir, script);
+
+    if (!fs.existsSync(srcFile)) {
+      continue; // Source script doesn't exist, skip
+    }
+
+    if (fs.existsSync(destFile)) {
+      skipped.push(script);
+      console.log(`  ${yellow}⚠${reset} Skipped scripts/${script} (already exists)`);
+    } else {
+      fs.copyFileSync(srcFile, destFile);
+      // Set executable bit on Unix systems
+      try {
+        fs.chmodSync(destFile, 0o755);
+      } catch (e) {
+        // Ignore chmod errors (Windows)
+      }
+      installed.push(script);
+      console.log(`  ${green}✓${reset} Installed scripts/${script}`);
+    }
+  }
+
+  return { installed, skipped };
+}
+
+/**
+ * Add npm scripts to target package.json
+ */
+function addNpmScripts(targetDir, installedScripts) {
+  const pkgPath = path.join(targetDir, 'package.json');
+
+  if (!fs.existsSync(pkgPath)) {
+    return { added: [], skipped: [] };
+  }
+
+  let pkgJson;
+  try {
+    pkgJson = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  } catch (e) {
+    console.log(`  ${yellow}⚠${reset} Could not parse package.json, skipping npm scripts`);
+    return { added: [], skipped: [] };
+  }
+
+  if (!pkgJson.scripts) {
+    pkgJson.scripts = {};
+  }
+
+  const added = [];
+  const skipped = [];
+
+  // Add pushpa script if pushpa-mode.sh was installed
+  if (installedScripts.includes('pushpa-mode.sh') || fs.existsSync(path.join(targetDir, 'scripts', 'pushpa-mode.sh'))) {
+    if (pkgJson.scripts.pushpa) {
+      skipped.push('pushpa');
+      console.log(`  ${yellow}⚠${reset} Skipped npm script "pushpa" (already exists)`);
+    } else {
+      pkgJson.scripts.pushpa = 'bash scripts/pushpa-mode.sh';
+      added.push('pushpa');
+      console.log(`  ${green}✓${reset} Added npm script "pushpa"`);
+    }
+  }
+
+  // Add mcp:setup script if mcp-setup.sh was installed
+  if (installedScripts.includes('mcp-setup.sh') || fs.existsSync(path.join(targetDir, 'scripts', 'mcp-setup.sh'))) {
+    if (pkgJson.scripts['mcp:setup']) {
+      skipped.push('mcp:setup');
+      console.log(`  ${yellow}⚠${reset} Skipped npm script "mcp:setup" (already exists)`);
+    } else {
+      pkgJson.scripts['mcp:setup'] = 'bash scripts/mcp-setup.sh';
+      added.push('mcp:setup');
+      console.log(`  ${green}✓${reset} Added npm script "mcp:setup"`);
+    }
+  }
+
+  // Write back if we added anything
+  if (added.length > 0) {
+    fs.writeFileSync(pkgPath, JSON.stringify(pkgJson, null, 2) + '\n');
+  }
+
+  return { added, skipped };
+}
+
+/**
  * Install to the specified directory
  */
 function install(isGlobal) {
@@ -261,6 +402,23 @@ function install(isGlobal) {
       ]
     });
     console.log(`  ${green}✓${reset} Configured update check hook`);
+  }
+
+  // Install Pushpa Mode and MCP setup scripts to the project directory
+  // For local install, use current directory; for global, also install to cwd if it has package.json
+  const projectDir = process.cwd();
+  const projectPkgPath = path.join(projectDir, 'package.json');
+  const hasProjectPkg = fs.existsSync(projectPkgPath);
+
+  if (hasProjectPkg) {
+    console.log(`\n  ${cyan}Installing project scripts to ${projectDir.replace(os.homedir(), '~')}${reset}\n`);
+    const { installed, skipped } = installScripts(projectDir);
+
+    // Add npm scripts if we have package.json
+    const allInstalledScripts = [...installed];
+    // Include skipped scripts since they already exist
+    skipped.forEach(s => allInstalledScripts.push(s));
+    addNpmScripts(projectDir, allInstalledScripts);
   }
 
   return { settingsPath, settings, statuslineCommand, notifyCommand };

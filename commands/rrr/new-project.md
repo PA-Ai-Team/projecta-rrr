@@ -395,7 +395,7 @@ Ask these questions using AskUserQuestion (can batch into 2-3 calls):
 - header: "Storage"
 - question: "Are file uploads/media needed?"
 - options:
-  - "Yes, use R2 (Recommended)" — Cloudflare R2
+  - "Yes, use Cloudflare R2 (Recommended)" — Cloudflare R2 (S3-compatible)
   - "Yes, other" — Specify provider (requires reason)
   - "No storage needed" — Skip object storage
 
@@ -456,7 +456,7 @@ features:
   db: [neon | none | other]
   deploy: [render | none | other]
   payments: [stripe | none | other]
-  object_storage: [r2 | none | other]
+  object_storage: [cloudflare_r2 | none | other]  # Cloudflare R2 (S3-compatible)
   analytics: [posthog | none | other]
   voice: [deepgram | none | other]
 

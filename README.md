@@ -197,7 +197,7 @@ RRR includes a default stack optimized for rapid MVP development. Defaults are r
 | Database | Neon | — |
 | Auth | Clerk | Neon Auth |
 | Payments | Stripe | — |
-| Object Storage | Cloudflare R2 | — |
+| Object Storage | Cloudflare R2 (S3-compatible) | — |
 | Analytics | PostHog | — |
 | Voice | Deepgram | — |
 | Deploy | Render | — |
@@ -244,13 +244,17 @@ This reads your feature selections and outputs the MCP configuration for Claude 
 | Voice (Deepgram) | `@deepgram/mcp-server` |
 | Browser (Browserbase) | `@anthropic/mcp-browserbase` |
 | Sandbox (E2B) | `@e2b/mcp-server` |
-| Storage (R2) | `@cloudflare/mcp-server-r2` |
+| Storage (Cloudflare R2) | `@cloudflare/mcp-server-r2` |
 
 **Always included:** Context7 (docs), GitHub, Filesystem, Sequential Thinking.
 
 ### Pushpa Mode (Autopilot)
 
 Run phases overnight while you sleep. Pushpa Mode is an unattended runner that plans and executes phases sequentially, skipping any that require human verification.
+
+**After running `npx projecta-rrr`, Pushpa Mode is automatically installed:**
+- `scripts/pushpa-mode.sh` — the runner script
+- `npm run pushpa` — npm script shortcut
 
 ```bash
 bash scripts/pushpa-mode.sh
@@ -271,6 +275,10 @@ npm run pushpa
 - Set all required API keys (script will check and warn)
 - Recommend enabling YOLO mode in `.planning/config.json`
 
+**MVP_FEATURES.yml location:**
+- Preferred: `./MVP_FEATURES.yml` (repo root)
+- Legacy: `./.planning/MVP_FEATURES.yml`
+
 **Where outputs live:**
 - Report: `.planning/PUSHPA_REPORT.md`
 - Logs: `.planning/logs/pushpa_*.log`
@@ -289,7 +297,7 @@ Pushpa Mode will skip these phases and record them in the report for manual foll
   bash scripts/pushpa-mode.sh
   ```
 - Running inside Claude Code works but can trigger approval prompts ("Do you want to proceed?").
-- If the script detects Claude Code, it will prompt: `Continue running Pushpa Mode inside Claude Code? (y/N)` — default is **No** (recommended), so you can switch to an external terminal.
+- The script detects if it's running inside Claude Code and prompts: `Continue running Pushpa Mode inside Claude Code? (y/N)` — default is **No**. Press Enter to exit with instructions to run externally.
 
 ---
 
