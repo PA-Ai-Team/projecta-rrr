@@ -119,11 +119,24 @@ Config: @.planning/config.json (if exists)",
    - Summary creation
    - State updates
 
-6.5. **Run tests and visual proof (executor responsibility)**
+6.5. **Run verification ladder (executor responsibility)**
 
-   After implementation tasks complete and BEFORE writing SUMMARY.md, executor MUST:
+   After implementation tasks complete and BEFORE writing SUMMARY.md, executor MUST run the verification ladder based on plan frontmatter.
 
-   a. **Run unit tests** (if they exist):
+   **Step 1: Read plan verification metadata**
+   ```yaml
+   # From plan frontmatter
+   verification:
+     surface: ui_affecting | backend_only
+     required_steps:
+       - unit_tests
+       - playwright           # Only for ui_affecting
+       - chrome_visual_check  # Only for ui_affecting
+   ```
+
+   **Step 2: Execute required steps in order**
+
+   a. **unit_tests** (always, if tests exist):
       ```bash
       # Check if unit tests exist
       ls src/**/*.test.ts __tests__/**/*.ts 2>/dev/null
@@ -132,7 +145,7 @@ Config: @.planning/config.json (if exists)",
       ```
       Record pass/fail in SUMMARY.md.
 
-   b. **Run e2e tests** (if they exist):
+   b. **playwright** (if in required_steps AND e2e tests exist):
       ```bash
       # Check if e2e tests exist
       ls e2e/*.spec.ts 2>/dev/null
@@ -141,20 +154,38 @@ Config: @.planning/config.json (if exists)",
       ```
       Record pass/fail in SUMMARY.md.
 
-   c. **Confirm artifact locations**:
+      Confirm artifact locations:
       - `.planning/artifacts/playwright/test-results/` — screenshots, traces, videos
       - `.planning/artifacts/playwright/report/` — HTML report
 
-   d. **Append to VISUAL_PROOF.md** (per projecta.visual-proof skill):
+   c. **chrome_visual_check** (if in required_steps AND not Pushpa mode):
+      ```bash
+      # Skip in Pushpa mode
+      if [[ -n "${PUSHPA_MODE:-}" ]]; then
+        echo "SKIP: Chrome visual check disabled in Pushpa Mode"
+      else
+        bash scripts/chrome-visual-check.sh
+      fi
+      ```
+      Record pass/fail/skip in SUMMARY.md.
+
+      **IMPORTANT:** chrome_visual_check requires human interaction. It is automatically SKIPPED when:
+      - PUSHPA_MODE environment variable is set
+      - Running in CI (CI or GITHUB_ACTIONS env vars present)
+      - No display available (non-Darwin without DISPLAY)
+
+   **Step 3: Append to VISUAL_PROOF.md** (per projecta.visual-proof skill):
       ```markdown
       ## Run: {ISO-8601 datetime}
 
       **Plan:** {phase}-{plan}
+      **Surface:** {ui_affecting | backend_only}
       **Commands:**
       - `npm test` — {pass/fail or "skipped"}
-      - `npx playwright test` — {pass/fail or "skipped"}
+      - `npx playwright test` — {pass/fail or "skipped" or "n/a (backend_only)"}
+      - `chrome_visual_check` — {pass/fail or "skipped (Pushpa)" or "n/a (backend_only)"}
 
-      **Result:** {PASS|FAIL} ({passed}/{total} tests)
+      **Result:** {PASS|FAIL} ({passed}/{total} steps)
 
       ### Artifact Paths
       - Report: `.planning/artifacts/playwright/report/index.html`
@@ -163,9 +194,18 @@ Config: @.planning/config.json (if exists)",
       ---
       ```
 
-   **Backwards compatibility:** If no tests exist, skip silently. Do not fail plans that don't have tests.
+   **Verification by surface type:**
 
-   **Visual proof failure does NOT block plan completion** — log as warning, continue to SUMMARY.md.
+   | Surface | unit_tests | playwright | chrome_visual_check |
+   |---------|------------|------------|---------------------|
+   | ui_affecting | Yes | Yes | Yes (skip in Pushpa) |
+   | backend_only | Yes | No | No |
+
+   **Backwards compatibility:**
+   - If no tests exist, skip silently. Do not fail plans that don't have tests.
+   - Plans without `verification:` frontmatter default to `backend_only` with `unit_tests` only.
+
+   **Verification failure does NOT block plan completion** — log as warning, continue to SUMMARY.md.
 
 7. **Handle subagent return**
    - If contains "## CHECKPOINT REACHED": Execute checkpoint_handling

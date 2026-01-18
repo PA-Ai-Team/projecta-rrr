@@ -7,9 +7,23 @@ max_lines: 150
 
 # Visual Proof System
 
+## Verification Ladder
+
+This skill covers **step 2** of the verification ladder for UI_AFFECTING plans:
+
+```
+1. unit_tests      → Fast, isolated logic checks
+2. playwright      → Automated UI tests (THIS SKILL)
+3. chrome_visual_check → Human-level verification (see projecta.chrome-visual-check)
+```
+
+For UI_AFFECTING plans: all 3 steps are MANDATORY (chrome skipped in Pushpa mode).
+For BACKEND_ONLY plans: only unit_tests runs.
+
 ## When to Use
 
 Load this skill when:
+- Plan has `verification.surface: ui_affecting`
 - Verifying UI changes visually
 - Running post-execution validation
 - Capturing screenshots or traces for review
@@ -136,11 +150,13 @@ After EVERY test run, append an entry with this format:
 ## Run: {ISO-8601 datetime}
 
 **Plan:** {phase}-{plan} (or "manual run")
+**Surface:** {ui_affecting | backend_only}
 **Commands:**
-- `npm test` — {pass/fail}
-- `npx playwright test` — {pass/fail}
+- `npm test` — {pass/fail or "skipped"}
+- `npx playwright test` — {pass/fail or "skipped" or "n/a (backend_only)"}
+- `chrome_visual_check` — {pass/fail or "skipped (Pushpa)" or "n/a (backend_only)"}
 
-**Result:** {PASS|FAIL} ({passed}/{total} tests)
+**Result:** {PASS|FAIL} ({passed}/{total} steps)
 
 ### Test Summary
 | Test | Status | Duration |

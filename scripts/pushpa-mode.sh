@@ -71,6 +71,16 @@ fi
 # HITL markers
 HITL_MARKERS=("HITL_REQUIRED: true" "HUMAN_VERIFICATION_REQUIRED" "MANUAL_VERIFICATION")
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Pushpa Mode Environment Flag
+# ═══════════════════════════════════════════════════════════════════════════════
+# Export PUSHPA_MODE so downstream scripts know they're running unattended.
+# This flag is checked by:
+# - scripts/chrome-visual-check.sh (MUST skip - requires human interaction)
+# - scripts/visual-proof.sh (runs headless only, never interactive)
+# - execute-plan/execute-phase (skips chrome_visual_check step)
+export PUSHPA_MODE=1
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -724,7 +734,25 @@ execute_phase() {
 }
 
 run_visual_proof() {
-    log INFO "Running visual proof..."
+    log INFO "Running visual proof (Pushpa Mode: headless only)..."
+
+    # ════════════════════════════════════════════════════════════════════
+    # VERIFICATION LADDER IN PUSHPA MODE
+    # ════════════════════════════════════════════════════════════════════
+    # Pushpa Mode runs the verification ladder WITHOUT chrome_visual_check:
+    #
+    # | Step               | Pushpa Mode |
+    # |--------------------|-------------|
+    # | unit_tests         | Yes         |
+    # | playwright         | Yes         |
+    # | chrome_visual_check| NEVER       |
+    #
+    # Chrome visual check requires human interaction and is ALWAYS SKIPPED
+    # in Pushpa Mode. The PUSHPA_MODE env var tells scripts to skip it.
+    # ════════════════════════════════════════════════════════════════════
+
+    # NEVER run chrome-visual-check.sh in Pushpa Mode
+    # It requires human interaction which is impossible in unattended runs
 
     # Check if visual-proof.sh exists
     if [ -f "scripts/visual-proof.sh" ]; then

@@ -71,9 +71,13 @@ Phase: $ARGUMENTS
    - Collect summaries from all plans
    - Report phase completion status
 
-7. **Run tests and visual proof** (after all plans complete)
+7. **Run phase verification ladder** (after all plans complete)
 
-   a. **Run unit tests** (if they exist):
+   Determine phase surface by checking plan frontmatters:
+   - If ANY plan has `verification.surface: ui_affecting` → phase is UI_AFFECTING
+   - If ALL plans have `verification.surface: backend_only` → phase is BACKEND_ONLY
+
+   a. **Run unit tests** (always, if they exist):
       ```bash
       # Check if unit tests exist
       ls src/**/*.test.ts __tests__/**/*.ts 2>/dev/null
@@ -81,7 +85,7 @@ Phase: $ARGUMENTS
       npm run test:unit || npm test
       ```
 
-   b. **Run e2e tests** (if they exist):
+   b. **Run e2e tests** (if UI_AFFECTING AND e2e tests exist):
       ```bash
       # Check for e2e tests
       ls e2e/*.spec.ts 2>/dev/null
@@ -91,20 +95,32 @@ Phase: $ARGUMENTS
       npx playwright test
       ```
 
-   c. **Confirm artifact locations**:
+   c. **Run chrome visual check** (if UI_AFFECTING AND not Pushpa mode):
+      ```bash
+      # Skip in Pushpa mode
+      if [[ -n "${PUSHPA_MODE:-}" ]]; then
+        echo "SKIP: Chrome visual check disabled in Pushpa Mode"
+      else
+        bash scripts/chrome-visual-check.sh
+      fi
+      ```
+
+   d. **Confirm artifact locations** (if playwright ran):
       - `.planning/artifacts/playwright/test-results/` — screenshots, traces, videos
       - `.planning/artifacts/playwright/report/` — HTML report
 
-   d. **Update VISUAL_PROOF.md** (append-only):
+   e. **Update VISUAL_PROOF.md** (append-only):
       ```markdown
       ## Run: {ISO-8601 datetime}
 
       **Phase:** {phase_number}-{phase_name}
+      **Surface:** {ui_affecting | backend_only}
       **Commands:**
       - `npm test` — {pass/fail or "skipped"}
-      - `npx playwright test` — {pass/fail or "skipped"}
+      - `npx playwright test` — {pass/fail or "skipped" or "n/a (backend_only)"}
+      - `chrome_visual_check` — {pass/fail or "skipped (Pushpa)" or "n/a (backend_only)"}
 
-      **Result:** {PASS|FAIL} ({passed}/{total} tests)
+      **Result:** {PASS|FAIL} ({passed}/{total} steps)
 
       ### Console Errors
       {List any console errors observed, or "None"}
@@ -115,6 +131,13 @@ Phase: $ARGUMENTS
 
       ---
       ```
+
+   **Verification by phase surface:**
+
+   | Surface | unit_tests | playwright | chrome_visual_check |
+   |---------|------------|------------|---------------------|
+   | ui_affecting | Yes | Yes | Yes (skip in Pushpa) |
+   | backend_only | Yes | No | No |
 
    **Visual proof failure does NOT block phase completion** — logged as warning only.
    Continue to verification step regardless of test results.

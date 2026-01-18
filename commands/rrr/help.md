@@ -510,6 +510,17 @@ Pushpa Mode will:
 **Where to run:** Recommended outside Claude Code for true unattended runs.
 The script detects if running inside Claude Code and prompts: `Continue running inside Claude Code? (y/N)`. Default is **No** — press Enter to exit with instructions to run externally.
 
+**Verification Ladder**
+
+Plans are automatically classified as `ui_affecting` or `backend_only`:
+
+| Surface | unit_tests | playwright | chrome_visual_check |
+|---------|------------|------------|---------------------|
+| ui_affecting | Yes | Yes | Yes (skip in Pushpa) |
+| backend_only | Yes | No | No |
+
+Planner adds `verification:` frontmatter automatically based on file paths and keywords.
+
 **Visual Proof (automated after phase execution)**
 
 Playwright tests + UX telemetry run automatically after `/rrr:execute-phase` and `/rrr:execute-plan`:
@@ -519,13 +530,14 @@ npm run e2e              # Run Playwright tests (headless)
 npm run e2e:headed       # Run with browser visible
 npm run e2e:ui           # Playwright UI mode (interactive)
 npm run visual:open      # Open HTML report
+bash scripts/chrome-visual-check.sh  # Interactive Chrome verification
 ```
 
-**Interactive verification (optional):**
+**Interactive verification (UI_AFFECTING plans only):**
 ```
-npx playwright test --ui     # Playwright UI mode for exploratory testing
-npx playwright test --headed # See tests execute in browser
-claude --chrome              # Deep UX exploration with Claude
+npx playwright test --ui             # Playwright UI mode for exploratory testing
+npx playwright test --headed         # See tests execute in browser
+bash scripts/chrome-visual-check.sh  # Claude Chrome for human-level verification
 ```
 
 **Artifacts location:**
@@ -544,7 +556,7 @@ Modes (in `.planning/config.json`):
 - `hybrid` — headless first, prompt for interactive on failure
 - `interactive_only` — skip Playwright, show manual checklist
 
-**VISUAL_PROOF.md:** Each test run appends an entry with datetime, plan/phase ID, commands run, pass/fail status, console errors, and artifact paths.
+**VISUAL_PROOF.md:** Each test run appends an entry with datetime, plan/phase ID, surface type, commands run, pass/fail status, console errors, and artifact paths.
 
 **Bootstrap only (no planning):**
 

@@ -395,6 +395,13 @@ user_setup: []              # Human-required setup (omit if empty)
 skills: []                  # Skills to load (auto-inferred if empty)
 skills_mode: normal         # "normal" (default) or "minimal" (skip default skill)
 
+verification:
+  surface: ui_affecting     # ui_affecting | backend_only (REQUIRED)
+  required_steps:           # Steps executor MUST run (auto-derived from surface)
+    - unit_tests
+    - playwright
+    - chrome_visual_check
+
 must_haves:
   truths: []                # Observable behaviors
   artifacts: []             # Files that must exist
@@ -500,6 +507,105 @@ skills:
 ```
 
 **Important:** Do not duplicate skills in the list. If already explicitly declared, skip.
+
+## Verification Classification (MANDATORY)
+
+Every plan MUST include `verification:` frontmatter. The planner determines `surface` based on classification rules, then derives `required_steps` automatically.
+
+### Classification Rules
+
+**UI_AFFECTING** - plan touches user-visible behavior:
+
+1. **File path patterns** (if `files_modified` matches ANY):
+   - `src/app/**` or `app/**` (Next.js pages/layouts)
+   - `src/components/**` or `components/**`
+   - `src/pages/**` or `pages/**`
+   - `*.tsx` (React components)
+   - `*.css`, `*.scss`, `tailwind.config.*`
+   - `src/styles/**`
+
+2. **Keyword triggers** (in objective, task names, or file content):
+   - UI terms: `ui`, `ux`, `form`, `modal`, `dialog`, `button`, `input`, `layout`
+   - Flow terms: `flow`, `wizard`, `stepper`, `navigation`, `menu`, `sidebar`
+   - Visual terms: `preview`, `editor`, `dashboard`, `chart`, `graph`, `animation`
+   - Page terms: `page`, `screen`, `view`, `component`, `header`, `footer`
+
+3. **API routes used by UI** (patterns in files_modified):
+   - `src/app/api/**` routes that serve UI data
+   - `pages/api/**` routes called from frontend
+
+4. **Schema/types affecting UI** (if plan mentions):
+   - Types used in components
+   - Zod schemas for forms
+   - API response types rendered in UI
+
+5. **Integration mentions**:
+   - "frontend", "client-side", "browser", "user-facing"
+   - "render", "display", "show", "visible"
+
+**BACKEND_ONLY** - plan has NO user-visible impact:
+
+1. **File path patterns** (ONLY these, no UI files):
+   - `src/lib/**` (pure utilities, no UI)
+   - `src/server/**` (server-only code)
+   - `scripts/**` (CLI/build scripts)
+   - `*.config.*` (configuration files)
+   - Database migrations, seeds
+
+2. **Keyword indicators**:
+   - "migration", "seed", "script", "cli", "cron", "job"
+   - "refactor internals", "optimize query", "add logging"
+   - No UI/visual keywords present
+
+3. **Explicit backend work**:
+   - Database schema changes (not affecting UI types)
+   - Server-side utilities
+   - Build/deploy configuration
+
+### Required Steps by Surface
+
+**UI_AFFECTING plans:**
+```yaml
+verification:
+  surface: ui_affecting
+  required_steps:
+    - unit_tests
+    - playwright
+    - chrome_visual_check
+```
+
+**BACKEND_ONLY plans:**
+```yaml
+verification:
+  surface: backend_only
+  required_steps:
+    - unit_tests
+```
+
+### Classification Decision Tree
+
+```
+START
+  │
+  ├─ Does files_modified contain ANY .tsx file?
+  │   └─ YES → UI_AFFECTING
+  │
+  ├─ Does files_modified contain src/app/**, src/components/**, src/pages/**?
+  │   └─ YES → UI_AFFECTING
+  │
+  ├─ Does objective/tasks mention UI keywords?
+  │   └─ YES → UI_AFFECTING
+  │
+  ├─ Is this an API route? Check if called from UI
+  │   ├─ Called from frontend → UI_AFFECTING
+  │   └─ Backend-only (cron, webhook) → BACKEND_ONLY
+  │
+  └─ None of the above → BACKEND_ONLY
+```
+
+### When in Doubt
+
+If classification is ambiguous, default to **UI_AFFECTING**. False positives (extra visual checks) are preferable to false negatives (missing UI verification).
 
 **Explicit declaration** (when known):
 ```yaml
