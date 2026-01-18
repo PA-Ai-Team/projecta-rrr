@@ -274,17 +274,32 @@ log() {
 # ═══════════════════════════════════════════════════════════════════════════════
 
 detect_claude_code() {
+    # Check Claude-related environment variables
     if [ -n "${CLAUDE:-}" ] || [ -n "${CLAUDE_CODE:-}" ] || [ -n "${ANTHROPIC:-}" ]; then
         return 0
     fi
     if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
         return 0
     fi
+
+    # Check for any CLAUDE_* or ANTHROPIC_* env vars (pattern match)
+    if env | grep -qiE "^CLAUDE_|^ANTHROPIC_"; then
+        return 0
+    fi
+
+    # Check if running in Claude Code's terminal (session marker)
+    if [ -n "${CLAUDE_SESSION_ID:-}" ] || [ -n "${CLAUDE_WORKSPACE:-}" ]; then
+        return 0
+    fi
+
+    # Check parent process name for "claude"
     local parent_name=""
     parent_name=$(ps -o comm= -p "$PPID" 2>/dev/null || echo "")
     if echo "$parent_name" | grep -qi "claude"; then
         return 0
     fi
+
+    # Check grandparent process name for "claude"
     local grandparent_pid=""
     grandparent_pid=$(ps -o ppid= -p "$PPID" 2>/dev/null | tr -d ' ' || echo "")
     if [ -n "$grandparent_pid" ] && [ "$grandparent_pid" != "1" ]; then
@@ -294,6 +309,21 @@ detect_claude_code() {
             return 0
         fi
     fi
+
+    # Check process tree for claude (up to 5 levels)
+    local current_pid="$$"
+    local depth=0
+    while [ "$depth" -lt 5 ] && [ -n "$current_pid" ] && [ "$current_pid" != "1" ]; do
+        local proc_name=""
+        proc_name=$(ps -o comm= -p "$current_pid" 2>/dev/null || echo "")
+        if echo "$proc_name" | grep -qi "claude"; then
+            return 0
+        fi
+        current_pid=$(ps -o ppid= -p "$current_pid" 2>/dev/null | tr -d ' ' || echo "")
+        depth=$((depth + 1))
+    done
+
+    # Check VS Code with Claude extension active
     if [ "${TERM_PROGRAM:-}" = "vscode" ]; then
         if [ -n "${VSCODE_GIT_IPC_HANDLE:-}" ]; then
             local ps_output=""
@@ -303,6 +333,7 @@ detect_claude_code() {
             fi
         fi
     fi
+
     return 1
 }
 
@@ -310,22 +341,33 @@ check_claude_code_environment() {
     if detect_claude_code; then
         echo ""
         echo -e "${YELLOW}════════════════════════════════════════════════════════════════${NC}"
-        echo -e "${YELLOW}  Pushpa Mode is running inside Claude Code.${NC}"
+        echo -e "${YELLOW}  ⚠ DETECTED: Running inside Claude Code terminal${NC}"
         echo -e "${YELLOW}════════════════════════════════════════════════════════════════${NC}"
         echo ""
-        echo "   Pushpa Mode is best run in a separate terminal for unattended execution."
-        echo "   This can trigger approval prompts and may not be fully unattended."
+        echo "   Pushpa Mode is designed for unattended overnight execution."
+        echo "   Running inside Claude Code's interactive session can:"
+        echo "   - Trigger permission approval prompts"
+        echo "   - Be interrupted by context window resets"
+        echo "   - Not run truly unattended"
         echo ""
-        echo -e "${GREEN}Recommended:${NC}"
-        echo "   Open a new system terminal (outside Claude Code) and run:"
-        echo -e "     ${CYAN}bash scripts/pushpa-mode.sh${NC}"
+        echo -e "${GREEN}RECOMMENDED:${NC} Run in a separate terminal window"
+        echo ""
+        echo "   1. Open a new system terminal (Terminal.app, iTerm, etc.)"
+        echo "   2. Navigate to your project:"
+        echo -e "      ${CYAN}cd $(pwd)${NC}"
+        echo "   3. Run Pushpa Mode:"
+        echo -e "      ${CYAN}bash scripts/pushpa-mode.sh${NC}"
         echo ""
 
-        read -r -p "Continue running Pushpa Mode inside Claude Code? (y/N): " response
+        read -r -p "Continue anyway inside Claude Code? (y/N): " response
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
             echo ""
-            echo "Exiting Pushpa Mode (recommended)."
-            echo "Run this outside Claude Code:"
+            echo -e "${GREEN}Good choice!${NC} Exiting Pushpa Mode."
+            echo ""
+            echo "To run Pushpa Mode properly, copy and paste these commands"
+            echo "into a new terminal window:"
+            echo ""
+            echo -e "  ${CYAN}cd $(pwd)${NC}"
             echo -e "  ${CYAN}bash scripts/pushpa-mode.sh${NC}"
             echo ""
             exit 0
@@ -334,7 +376,7 @@ check_claude_code_environment() {
         echo -e "${YELLOW}Continuing inside Claude Code (user confirmed)...${NC}"
         echo ""
     else
-        echo -e "${GREEN}Pushpa Mode running in standard terminal (recommended).${NC}"
+        echo -e "${GREEN}✓ Running in standard terminal (recommended for Pushpa Mode)${NC}"
     fi
 }
 

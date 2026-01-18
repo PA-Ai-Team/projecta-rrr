@@ -71,13 +71,53 @@ Phase: $ARGUMENTS
    - Collect summaries from all plans
    - Report phase completion status
 
-7. **Run visual proof** (if Playwright tests exist)
-   - Check for e2e/*.spec.ts files
-   - If tests exist, run `bash scripts/visual-proof.sh`
-   - Results appended to `.planning/VISUAL_PROOF.md`
-   - UX telemetry (console errors, page errors, network failures) captured
-   - Artifacts stored in `.planning/artifacts/playwright/`
-   - Visual proof failure does NOT block phase completion (logged as warning)
+7. **Run tests and visual proof** (after all plans complete)
+
+   a. **Run unit tests** (if they exist):
+      ```bash
+      # Check if unit tests exist
+      ls src/**/*.test.ts __tests__/**/*.ts 2>/dev/null
+      # If found:
+      npm run test:unit || npm test
+      ```
+
+   b. **Run e2e tests** (if they exist):
+      ```bash
+      # Check for e2e tests
+      ls e2e/*.spec.ts 2>/dev/null
+      # If found, run via script or directly:
+      bash scripts/visual-proof.sh
+      # or
+      npx playwright test
+      ```
+
+   c. **Confirm artifact locations**:
+      - `.planning/artifacts/playwright/test-results/` — screenshots, traces, videos
+      - `.planning/artifacts/playwright/report/` — HTML report
+
+   d. **Update VISUAL_PROOF.md** (append-only):
+      ```markdown
+      ## Run: {ISO-8601 datetime}
+
+      **Phase:** {phase_number}-{phase_name}
+      **Commands:**
+      - `npm test` — {pass/fail or "skipped"}
+      - `npx playwright test` — {pass/fail or "skipped"}
+
+      **Result:** {PASS|FAIL} ({passed}/{total} tests)
+
+      ### Console Errors
+      {List any console errors observed, or "None"}
+
+      ### Artifact Paths
+      - Report: `.planning/artifacts/playwright/report/index.html`
+      - Failures: `.planning/artifacts/playwright/test-results/`
+
+      ---
+      ```
+
+   **Visual proof failure does NOT block phase completion** — logged as warning only.
+   Continue to verification step regardless of test results.
 
 8. **Verify phase goal**
    - Spawn `rrr-verifier` subagent with phase directory and goal
@@ -306,8 +346,10 @@ After all plans in phase complete (step 7):
 <success_criteria>
 - [ ] All incomplete plans in phase executed
 - [ ] Each plan has SUMMARY.md
-- [ ] Visual proof run (if e2e tests exist)
-- [ ] VISUAL_PROOF.md updated with run results
+- [ ] Unit tests run (if `src/**/*.test.ts` or `__tests__/**/*.ts` exist)
+- [ ] E2E tests run (if `e2e/*.spec.ts` exist)
+- [ ] VISUAL_PROOF.md updated with run results (append-only)
+- [ ] Artifact paths confirmed: `.planning/artifacts/playwright/`
 - [ ] Phase goal verified (must_haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] STATE.md reflects phase completion

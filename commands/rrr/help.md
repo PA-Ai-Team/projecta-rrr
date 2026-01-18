@@ -25,15 +25,32 @@ Output ONLY the reference content below. Do NOT add:
 
 **Still seeing "Unknown skill"?** Reinstall with `npx projecta-rrr@latest`, then restart `claude` again.
 
+**Not sure what to run?** Use `/rrr:mvp` — it detects your project state and tells you exactly what to do.
+
 **Pick your start command:**
 
 | Scenario | Command |
 |----------|---------|
 | New/empty folder (greenfield) | `/rrr:new-project` — bootstraps Next.js/TS baseline if folder is empty |
-| Existing repo (brownfield) | `/rrr:new-project` — brownfield-safe; won't overwrite your repo |
+| Existing repo (brownfield) | `/rrr:map-codebase` (optional) → `/rrr:new-project` |
 | RRR already initialized | `/rrr:progress` — if `.planning/STATE.md` exists |
+| Not sure which? | `/rrr:mvp` — detects state and routes you |
 
 **MVP Definition of Done at Projecta:** local demo runs + tests pass.
+
+**Overnight automation:** Use `/rrr:overnight` for Pushpa Mode guidance.
+
+## Where to Run Commands
+
+| Environment | What to run | Notes |
+|-------------|-------------|-------|
+| **Inside Claude Code** | `/rrr:*` slash commands | Interactive planning/execution |
+| **Outside Claude Code** | `bash scripts/pushpa-mode.sh` | Unattended overnight runs |
+| **npm scripts** | `npm run pushpa`, `npm run e2e` | Convenience wrappers |
+
+**After installing from inside Claude Code:** Exit and restart `claude` to load new commands.
+
+**Pushpa Mode (overnight):** Always run in a separate terminal for true unattended execution.
 
 ## Quick Start
 
@@ -366,6 +383,25 @@ See what's changed since your installed version.
 
 Usage: `/rrr:whats-new`
 
+**`/rrr:mvp`**
+Smart router that detects your project state and tells you what to run next.
+
+- Detects if `.planning/STATE.md` exists → routes to `/rrr:progress`
+- Detects if repo has code (package.json, .git, src/) → suggests `/rrr:map-codebase` then `/rrr:new-project`
+- Otherwise → suggests `/rrr:new-project`
+
+Usage: `/rrr:mvp`
+
+**`/rrr:overnight`**
+Pushpa Mode guidance: preflight checks and run instructions.
+
+- Checks if project is initialized
+- Checks if `scripts/pushpa-mode.sh` exists (gives copy instructions if not)
+- Provides exact command to run in a normal terminal
+- Recommends running outside Claude Code interactive session
+
+Usage: `/rrr:overnight`
+
 ## Files & Structure
 
 ```
@@ -476,13 +512,30 @@ The script detects if running inside Claude Code and prompts: `Continue running 
 
 **Visual Proof (automated after phase execution)**
 
-Playwright tests + UX telemetry run automatically after `/rrr:execute-phase`:
+Playwright tests + UX telemetry run automatically after `/rrr:execute-phase` and `/rrr:execute-plan`:
 
 ```
-npm run e2e              # Run tests
-npm run e2e:headed       # Headed mode
-npm run e2e:ui           # Playwright UI
-npm run visual:open      # Open report
+npm run e2e              # Run Playwright tests (headless)
+npm run e2e:headed       # Run with browser visible
+npm run e2e:ui           # Playwright UI mode (interactive)
+npm run visual:open      # Open HTML report
+```
+
+**Interactive verification (optional):**
+```
+npx playwright test --ui     # Playwright UI mode for exploratory testing
+npx playwright test --headed # See tests execute in browser
+claude --chrome              # Deep UX exploration with Claude
+```
+
+**Artifacts location:**
+```
+.planning/
+├── VISUAL_PROOF.md              # Append-only run log
+└── artifacts/
+    └── playwright/
+        ├── report/              # HTML report (index.html)
+        └── test-results/        # Screenshots, traces, videos
 ```
 
 Modes (in `.planning/config.json`):
@@ -491,10 +544,7 @@ Modes (in `.planning/config.json`):
 - `hybrid` — headless first, prompt for interactive on failure
 - `interactive_only` — skip Playwright, show manual checklist
 
-Artifacts:
-- `.planning/artifacts/playwright/report/` — HTML report
-- `.planning/artifacts/playwright/test-results/` — screenshots, videos, traces
-- `.planning/VISUAL_PROOF.md` — append-only run log
+**VISUAL_PROOF.md:** Each test run appends an entry with datetime, plan/phase ID, commands run, pass/fail status, console errors, and artifact paths.
 
 **Bootstrap only (no planning):**
 

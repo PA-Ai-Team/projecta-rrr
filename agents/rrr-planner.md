@@ -473,7 +473,7 @@ Skills load into executor context at plan execution time. **Default skill** (`pr
 
 | Pattern Keywords | Skill |
 |------------------|-------|
-| test, vitest, playwright, e2e, unit test | `projecta.testing` |
+| test, vitest, playwright, e2e, unit test | `projecta.testing-vitest-playwright` |
 | visual, screenshot, artifact, proof | `projecta.visual-proof` |
 | R2, storage, S3, bucket, upload, cloudflare | `projecta.cloudflare-r2` |
 | PDF, document, pdf | `anthropic.pdf` |
@@ -481,6 +481,25 @@ Skills load into executor context at plan execution time. **Default skill** (`pr
 | MCP, Neon, Stripe, PostHog | `projecta.mcp-stack` |
 | shadcn, tailwind, button, card, dialog, ui component | `projecta.shadcn-ui` |
 | webapp, web app, browser test | `anthropic.webapp-testing` |
+
+**UI/UX Auto-Tagging** - when plan touches UI/UX work, ALWAYS include BOTH skills:
+
+Trigger keywords: `ui`, `ux`, `flow`, `form`, `modal`, `layout`, `preview`, `editor`, `dashboard`, `component`, `page`, `screen`, `view`, `button`, `input`, `navigation`, `menu`, `sidebar`, `header`, `footer`
+
+Trigger file paths (if `files_modified` contains any of these patterns):
+- `src/app/**` or `app/**` (Next.js pages/layouts)
+- `src/components/**` or `components/**`
+- `src/pages/**` or `pages/**`
+- Any `.tsx` file with "page", "layout", "component" in name
+
+When ANY trigger matches, add to frontmatter (deduplicated):
+```yaml
+skills:
+  - projecta.testing-vitest-playwright
+  - projecta.visual-proof
+```
+
+**Important:** Do not duplicate skills in the list. If already explicitly declared, skip.
 
 **Explicit declaration** (when known):
 ```yaml

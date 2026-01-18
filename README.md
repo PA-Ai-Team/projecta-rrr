@@ -84,6 +84,57 @@ That's it. Verify with `/rrr:help` inside your Claude Code interface.
 >
 > This resolves "Unknown skill: rrr:help" errors.
 
+### Where to Run Commands
+
+| Environment | What to run | Notes |
+|-------------|-------------|-------|
+| **Inside Claude Code** | `/rrr:*` slash commands | Interactive planning/execution |
+| **Outside Claude Code** | `bash scripts/pushpa-mode.sh` | Unattended overnight runs |
+| **npm scripts** | `npm run pushpa`, `npm run e2e` | Convenience wrappers |
+
+**After installing from inside Claude Code:** Exit and restart `claude` to load new commands.
+
+**Pushpa Mode (overnight):** Always run in a separate terminal window for true unattended execution. The script detects if running inside Claude Code and prompts you to confirm or exit.
+
+### Quick Start by Scenario
+
+| Your situation | Command to run |
+|----------------|----------------|
+| **Empty folder** (greenfield) | `/rrr:new-project` — bootstraps Next.js/TS + full planning |
+| **Existing repo** (brownfield) | `/rrr:map-codebase` (optional) → `/rrr:new-project` |
+| **Already initialized** (has `.planning/STATE.md`) | `/rrr:progress` |
+| **Not sure which?** | `/rrr:mvp` — detects state and routes you |
+
+**MVP Definition of Done at Projecta:** local demo runs + tests pass.
+
+### Pushpa Mode (Overnight Autopilot)
+
+Run phases unattended while you sleep. **Best run in a normal terminal** (outside Claude Code):
+
+```bash
+bash scripts/pushpa-mode.sh
+# or
+npm run pushpa
+```
+
+> **Where to run:** A system terminal or VS Code integrated terminal works great. Running inside the Claude interactive session can trigger approval prompts. The script detects this and prompts you to confirm or exit.
+
+**Quick guidance:** `/rrr:overnight` — checks prerequisites and gives exact instructions.
+
+**Outputs:**
+- Report: `.planning/PUSHPA_REPORT.md`
+- Logs: `.planning/logs/pushpa_*.log`
+- Artifacts: `.planning/artifacts/playwright/`
+
+**Optional:** Add to your project's `package.json`:
+```json
+{
+  "scripts": {
+    "pushpa": "bash scripts/pushpa-mode.sh"
+  }
+}
+```
+
 ### Staying Updated
 
 RRR evolves fast. Check for updates periodically:
@@ -343,6 +394,20 @@ RRR includes automated visual proof via Playwright tests and UX telemetry captur
 - Network failures (4xx, 5xx, failed requests)
 - Screenshots, traces, and videos (on failure)
 
+**Artifacts location:**
+```
+.planning/
+├── VISUAL_PROOF.md                    # Append-only run log
+└── artifacts/
+    └── playwright/
+        ├── report/                    # HTML report (index.html)
+        │   └── index.html
+        └── test-results/              # Per-test artifacts
+            ├── screenshot.png         # Captured on failure
+            ├── trace.zip              # Recorded trace
+            └── video.webm             # Recorded video
+```
+
 **Modes** (configured in `.planning/config.json`):
 
 | Mode | Behavior |
@@ -352,25 +417,30 @@ RRR includes automated visual proof via Playwright tests and UX telemetry captur
 | `hybrid` | Headless first, prompt for interactive fallback on eligible failures |
 | `interactive_only` | Skip Playwright, show manual UAT checklist |
 
-**Artifacts location:**
-- Report: `.planning/artifacts/playwright/report/`
-- Test results: `.planning/artifacts/playwright/test-results/`
-- UX telemetry: `.planning/artifacts/ux-telemetry/`
-- Run log: `.planning/VISUAL_PROOF.md` (append-only)
-
 **Commands:**
 ```bash
-npm run e2e              # Run Playwright tests
+npm run e2e              # Run Playwright tests (headless)
 npm run e2e:headed       # Run with browser visible
-npm run e2e:ui           # Playwright UI mode
+npm run e2e:ui           # Playwright UI mode (interactive)
 npm run visual:open      # Open last HTML report
 bash scripts/visual-proof.sh  # Full visual proof runner
 ```
 
+**Interactive verification (optional):**
+```bash
+npx playwright test --ui     # Playwright UI mode for exploratory testing
+npx playwright test --headed # See tests execute in browser
+claude --chrome              # Deep UX exploration with Claude
+```
+
 **Integration:**
 - Runs automatically after `/rrr:execute-phase` (if e2e tests exist)
+- Runs automatically after `/rrr:execute-plan` (if tests exist)
 - Runs in Pushpa Mode (headless only, never interactive)
-- Results logged to `.planning/VISUAL_PROOF.md`
+- Results logged to `.planning/VISUAL_PROOF.md` (append-only)
+
+**VISUAL_PROOF.md format:**
+Each run appends an entry with datetime, plan/phase ID, commands run, pass/fail status, console errors, and artifact paths.
 
 **UX Telemetry Fixture:**
 
@@ -571,6 +641,8 @@ You're never locked in. The system adapts.
 |---------|--------------|
 | `/rrr:progress` | Where am I? What's next? |
 | `/rrr:help` | Show all commands and usage guide |
+| `/rrr:mvp` | Smart router: detects state, tells you exactly what to run |
+| `/rrr:overnight` | Pushpa Mode guidance: preflight checks + run instructions |
 
 ### Verification
 

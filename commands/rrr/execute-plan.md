@@ -115,8 +115,57 @@ Config: @.planning/config.json (if exists)",
    - Deviation rules (auto-fix bugs, critical gaps, blockers; ask for architectural)
    - Checkpoint protocols (human-verify, decision, human-action)
    - Commit formatting (per-task atomic commits)
+   - **Test execution** (see step 6.5)
    - Summary creation
    - State updates
+
+6.5. **Run tests and visual proof (executor responsibility)**
+
+   After implementation tasks complete and BEFORE writing SUMMARY.md, executor MUST:
+
+   a. **Run unit tests** (if they exist):
+      ```bash
+      # Check if unit tests exist
+      ls src/**/*.test.ts __tests__/**/*.ts 2>/dev/null
+      # If found:
+      npm run test:unit || npm test
+      ```
+      Record pass/fail in SUMMARY.md.
+
+   b. **Run e2e tests** (if they exist):
+      ```bash
+      # Check if e2e tests exist
+      ls e2e/*.spec.ts 2>/dev/null
+      # If found:
+      npx playwright test
+      ```
+      Record pass/fail in SUMMARY.md.
+
+   c. **Confirm artifact locations**:
+      - `.planning/artifacts/playwright/test-results/` — screenshots, traces, videos
+      - `.planning/artifacts/playwright/report/` — HTML report
+
+   d. **Append to VISUAL_PROOF.md** (per projecta.visual-proof skill):
+      ```markdown
+      ## Run: {ISO-8601 datetime}
+
+      **Plan:** {phase}-{plan}
+      **Commands:**
+      - `npm test` — {pass/fail or "skipped"}
+      - `npx playwright test` — {pass/fail or "skipped"}
+
+      **Result:** {PASS|FAIL} ({passed}/{total} tests)
+
+      ### Artifact Paths
+      - Report: `.planning/artifacts/playwright/report/index.html`
+      - Failures: `.planning/artifacts/playwright/test-results/`
+
+      ---
+      ```
+
+   **Backwards compatibility:** If no tests exist, skip silently. Do not fail plans that don't have tests.
+
+   **Visual proof failure does NOT block plan completion** — log as warning, continue to SUMMARY.md.
 
 7. **Handle subagent return**
    - If contains "## CHECKPOINT REACHED": Execute checkpoint_handling
@@ -424,6 +473,9 @@ Continue handling returns until "## PLAN COMPLETE" or user stops.
 <success_criteria>
 - [ ] Plan executed (SUMMARY.md created)
 - [ ] All checkpoints handled
+- [ ] Tests run (if exist): unit tests via `npm test`, e2e via `npx playwright test`
+- [ ] VISUAL_PROOF.md updated with run record (if tests ran)
+- [ ] Artifact paths confirmed: `.planning/artifacts/playwright/`
 - [ ] If phase complete: Phase goal verified (rrr-verifier spawned, VERIFICATION.md created)
 - [ ] If phase complete: Visual proof run (if e2e tests exist)
 - [ ] If phase complete: REQUIREMENTS.md updated (phase requirements marked Complete)
