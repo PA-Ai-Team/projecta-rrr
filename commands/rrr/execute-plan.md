@@ -128,10 +128,11 @@ Config: @.planning/config.json (if exists)",
    # From plan frontmatter
    verification:
      surface: ui_affecting | backend_only
+     frontend_impact: true | false    # Enables two-step visual verification
      required_steps:
        - unit_tests
-       - playwright           # Only for ui_affecting
-       - chrome_visual_check  # Only for ui_affecting
+       - playwright           # Only for frontend_impact: true
+       - chrome_visual_check  # Only for frontend_impact: true (automated interactive)
    ```
 
    **Step 2: Execute required steps in order**
@@ -183,23 +184,25 @@ Config: @.planning/config.json (if exists)",
       **Commands:**
       - `npm test` — {pass/fail or "skipped"}
       - `npx playwright test` — {pass/fail or "skipped" or "n/a (backend_only)"}
-      - `chrome_visual_check` — {pass/fail or "skipped (Pushpa)" or "n/a (backend_only)"}
+      - `chrome_visual_check` — {pass/fail or "skipped (Pushpa/CI/no GUI)" or "n/a (backend_only)"}
 
       **Result:** {PASS|FAIL} ({passed}/{total} steps)
 
       ### Artifact Paths
-      - Report: `.planning/artifacts/playwright/report/index.html`
-      - Failures: `.planning/artifacts/playwright/test-results/`
+      - Playwright Report: `.planning/artifacts/playwright/report/index.html`
+      - Playwright Failures: `.planning/artifacts/playwright/test-results/`
+      - Chrome Screenshots: `.planning/artifacts/chrome/screenshots/`
+      - Chrome Logs: `.planning/artifacts/chrome/logs/`
 
       ---
       ```
 
-   **Verification by surface type:**
+   **Verification by frontend_impact:**
 
-   | Surface | unit_tests | playwright | chrome_visual_check |
-   |---------|------------|------------|---------------------|
-   | ui_affecting | Yes | Yes | Yes (skip in Pushpa) |
-   | backend_only | Yes | No | No |
+   | frontend_impact | unit_tests | playwright | chrome_visual_check |
+   |-----------------|------------|------------|---------------------|
+   | true | Yes | Yes | Yes (skip in Pushpa/CI) |
+   | false | Yes | No | No |
 
    **Backwards compatibility:**
    - If no tests exist, skip silently. Do not fail plans that don't have tests.
@@ -264,11 +267,32 @@ Handle verification result:
 
 When phase verification passes and e2e tests exist:
 
-1. Check for `e2e/*.spec.ts` files
-2. If tests exist, run `bash scripts/visual-proof.sh`
-3. Results appended to `.planning/VISUAL_PROOF.md`
-4. UX telemetry captured (console errors, page errors, network failures)
-5. Artifacts stored in `.planning/artifacts/playwright/`
+1. Check plan frontmatter for `verification.frontend_impact: true`
+2. Check for `e2e/*.spec.ts` files
+3. **If `frontend_impact: true`** — run TWO-STEP verification:
+   ```bash
+   # Step 1: Playwright (headless)
+   FRONTEND_IMPACT=true PLAN_ID={phase}-{plan} bash scripts/visual-proof.sh
+
+   # Step 2: Chrome visual check (automated interactive)
+   FRONTEND_IMPACT=true PLAN_ID={phase}-{plan} bash scripts/visual-proof.sh --chrome
+   ```
+
+4. **If `frontend_impact: false`** — run Playwright only:
+   ```bash
+   bash scripts/visual-proof.sh
+   ```
+
+5. Results appended to `.planning/VISUAL_PROOF.md` (separate entries for each step)
+6. UX telemetry captured (console errors, page errors, network failures)
+7. Artifacts stored in:
+   - `.planning/artifacts/playwright/` — Playwright results
+   - `.planning/artifacts/chrome/` — Chrome visual check results
+
+**Chrome step is SKIPPED automatically when:**
+- PUSHPA_MODE is set (but still runs Playwright)
+- CI environment detected
+- No GUI available (logs manual command to run locally)
 
 **Visual proof failure does NOT block phase completion** — logged as warning only.
 

@@ -385,35 +385,43 @@ Pushpa Mode will skip these phases and record them in the report for manual foll
 
 ### Verification Ladder
 
-RRR uses a deterministic verification ladder that triggers based on what the plan affects:
+RRR uses a deterministic verification ladder with **mandatory two-step verification** for frontend-impacting plans:
 
 **Plan Classification:**
-- **UI_AFFECTING** — plans touching frontend files, UI keywords, API routes used by UI
-- **BACKEND_ONLY** — plans with no user-visible impact (scripts, migrations, pure utilities)
+- **frontend_impact: true** — plans touching frontend files, UI keywords, API routes used by UI, FE integration
+- **frontend_impact: false** — plans with no user-visible impact (scripts, migrations, pure utilities)
 
-**Verification by Surface:**
+**Verification by Frontend Impact:**
 
-| Surface | unit_tests | playwright | chrome_visual_check |
-|---------|------------|------------|---------------------|
-| ui_affecting | Yes | Yes | Yes (skip in Pushpa) |
-| backend_only | Yes | No | No |
+| frontend_impact | unit_tests | playwright | chrome_visual_check |
+|-----------------|------------|------------|---------------------|
+| true | Yes | Yes | Yes (auto-skips in CI/Pushpa if no GUI) |
+| false | Yes | No | No |
+
+**Two-Step Visual Verification (frontend_impact: true):**
+1. **Step 1: Playwright** — Automated headless E2E tests
+2. **Step 2: Chrome Visual Check** — `claude --chrome` automated interactive verification
+
+Both steps run even when Playwright passes — we want visual/UI confirmation.
 
 The planner automatically classifies plans and adds `verification:` frontmatter:
 ```yaml
 verification:
   surface: ui_affecting
+  frontend_impact: true
   required_steps:
     - unit_tests
     - playwright
     - chrome_visual_check
 ```
 
-### Visual Proof (Automated UX Verification)
+### Visual Proof (Mandatory Two-Step Verification)
 
-RRR includes automated visual proof via Playwright tests and UX telemetry capture.
+RRR includes automated visual proof via Playwright tests and `claude --chrome` verification.
 
 **What it captures:**
 - Playwright test results (pass/fail)
+- Chrome visual confirmations (page renders, interactions, layout)
 - Console errors and warnings
 - Page errors (uncaught exceptions)
 - Network failures (4xx, 5xx, failed requests)
@@ -422,15 +430,18 @@ RRR includes automated visual proof via Playwright tests and UX telemetry captur
 **Artifacts location:**
 ```
 .planning/
-├── VISUAL_PROOF.md                    # Append-only run log
+├── VISUAL_PROOF.md                    # Append-only run log (both steps)
 └── artifacts/
-    └── playwright/
-        ├── report/                    # HTML report (index.html)
-        │   └── index.html
-        └── test-results/              # Per-test artifacts
-            ├── screenshot.png         # Captured on failure
-            ├── trace.zip              # Recorded trace
-            └── video.webm             # Recorded video
+    ├── playwright/
+    │   ├── report/                    # HTML report (index.html)
+    │   │   └── index.html
+    │   └── test-results/              # Per-test artifacts
+    │       ├── screenshot.png         # Captured on failure
+    │       ├── trace.zip              # Recorded trace
+    │       └── video.webm             # Recorded video
+    └── chrome/
+        ├── screenshots/               # Claude chrome visual captures
+        └── logs/                      # Chrome check logs
 ```
 
 **Modes** (configured in `.planning/config.json`):
@@ -444,12 +455,17 @@ RRR includes automated visual proof via Playwright tests and UX telemetry captur
 
 **Commands:**
 ```bash
+# Playwright
 npm run e2e              # Run Playwright tests (headless)
 npm run e2e:headed       # Run with browser visible
 npm run e2e:ui           # Playwright UI mode (interactive)
 npm run visual:open      # Open last HTML report
-bash scripts/visual-proof.sh  # Full visual proof runner
-bash scripts/chrome-visual-check.sh  # Interactive Chrome verification
+
+# Visual Proof (two-step for frontend_impact: true)
+bash scripts/visual-proof.sh           # Playwright only
+bash scripts/visual-proof.sh --chrome  # Playwright + chrome check (REQUIRED for FE)
+bash scripts/visual-proof.sh --pushpa  # Pushpa mode (headless)
+bash scripts/visual-proof.sh --pushpa --chrome  # Pushpa + chrome if GUI available
 ```
 
 **Interactive verification (UI_AFFECTING plans only):**
@@ -785,21 +801,32 @@ Community skills install to `.claude/skills/community/`.
 
 ### Vendoring Skills (Maintainers)
 
-RRR uses two vendoring scripts to pull skills from external repositories into the `rrr/skills/` directory:
+RRR uses vendoring scripts to pull skills from external repositories into the `rrr/skills/` directory:
 
 **Anthropic upstream skills** (`scripts/vendor-skills.sh`):
-Vendors official Anthropic skills into `rrr/skills/upstream/anthropic/`. Run by maintainers to update the bundled Anthropic skill set.
+Vendors official Anthropic skills into `rrr/skills/upstream/anthropic/`.
 
-**Community skill packs** (`scripts/vendor-community-skills.sh`):
-Vendors community skill packs into `rrr/skills/community/<pack-name>/`. By default, pulls from [ovachiever/droid-tings](https://github.com/ovachiever/droid-tings). This script is idempotent and only touches its target directory — it never modifies `upstream/` or `projecta/` folders.
+**Vercel Agent Skills** (`scripts/vendor-vercel-skills.sh`):
+Vendors curated React/Next.js best practices from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills). Small and included in npm package.
+
+**droid-tings Skills** (`scripts/vendor-droid-tings-skills.sh`):
+Vendors AI/ML focused skills from [ovachiever/droid-tings](https://github.com/ovachiever/droid-tings). Large (~40MB), **not included in npm** to keep package lean. Vendor on-demand when needed.
 
 ```bash
 # Vendor Anthropic skills (maintainer use)
 bash scripts/vendor-skills.sh
 
-# Vendor community skills (droid-tings pack)
-bash scripts/vendor-community-skills.sh
+# Vendor Vercel skills (small, recommended for frontend)
+bash scripts/vendor-vercel-skills.sh
+
+# Vendor droid-tings skills (large, use allowlist)
+bash scripts/vendor-droid-tings-skills.sh --list                    # List available
+DROID_TINGS_ALLOWLIST="axolotl,unsloth" bash scripts/vendor-droid-tings-skills.sh  # Specific skills
 ```
+
+**npm Package Policy:**
+- `projecta/*`, `upstream/*`, `community/vercel/*` — included in npm
+- `community/droid-tings/*` — excluded (40MB), vendor locally if needed
 
 ---
 

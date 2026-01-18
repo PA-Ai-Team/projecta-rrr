@@ -512,51 +512,75 @@ The script detects if running inside Claude Code and prompts: `Continue running 
 
 **Verification Ladder**
 
-Plans are automatically classified as `ui_affecting` or `backend_only`:
+Plans are automatically classified by `frontend_impact` (replaces legacy `ui_affecting`):
 
-| Surface | unit_tests | playwright | chrome_visual_check |
-|---------|------------|------------|---------------------|
-| ui_affecting | Yes | Yes | Yes (skip in Pushpa) |
-| backend_only | Yes | No | No |
+| frontend_impact | unit_tests | playwright | chrome_visual_check |
+|-----------------|------------|------------|---------------------|
+| true | Yes | Yes (Step 1) | Yes (Step 2) |
+| false | Yes | No | No |
 
-Planner adds `verification:` frontmatter automatically based on file paths and keywords.
+Planner adds `verification.frontend_impact: true|false` frontmatter automatically based on file paths and keywords. See `rrr/references/frontend-impact-detection.md` for classification rules.
 
-**Visual Proof (automated after phase execution)**
+**Visual Proof: Two-Step Verification**
 
-Playwright tests + UX telemetry run automatically after `/rrr:execute-phase` and `/rrr:execute-plan`:
+Frontend-impacting plans require **both** verification steps to be green:
 
+1. **Step 1: Playwright** — Automated E2E tests (baseline verification)
+2. **Step 2: Chrome** — `claude --chrome` visual check (human-level UX verification)
+
+Both steps run automatically after `/rrr:execute-phase` and `/rrr:execute-plan` when `frontend_impact: true`.
+
+**Step 1: Playwright Commands**
 ```
 npm run e2e              # Run Playwright tests (headless)
 npm run e2e:headed       # Run with browser visible
 npm run e2e:ui           # Playwright UI mode (interactive)
 npm run visual:open      # Open HTML report
-bash scripts/chrome-visual-check.sh  # Interactive Chrome verification
 ```
 
-**Interactive verification (UI_AFFECTING plans only):**
+**Step 2: Chrome Visual Check**
 ```
-npx playwright test --ui             # Playwright UI mode for exploratory testing
-npx playwright test --headed         # See tests execute in browser
-bash scripts/chrome-visual-check.sh  # Claude Chrome for human-level verification
+bash scripts/visual-proof.sh --chrome    # Run chrome step only
+claude --chrome                          # Direct chrome invocation
+```
+
+**Manual Two-Step Workflow**
+```bash
+# Step 1: Playwright
+bash scripts/visual-proof.sh
+
+# Step 2: Chrome (requires GUI)
+bash scripts/visual-proof.sh --chrome
 ```
 
 **Artifacts location:**
 ```
 .planning/
-├── VISUAL_PROOF.md              # Append-only run log
+├── VISUAL_PROOF.md              # Append-only run log (both steps)
 └── artifacts/
-    └── playwright/
-        ├── report/              # HTML report (index.html)
-        └── test-results/        # Screenshots, traces, videos
+    ├── playwright/
+    │   ├── report/              # HTML report (index.html)
+    │   └── test-results/        # Screenshots, traces, videos
+    └── chrome/
+        └── {plan-id}/           # Chrome visual check artifacts
+            ├── screenshot-*.png # Captured screenshots
+            └── session.json     # Chrome session metadata
 ```
 
-Modes (in `.planning/config.json`):
+**Modes (in `.planning/config.json`):**
 - `playwright` — headless (default)
 - `playwright_headed` — headed if TTY
 - `hybrid` — headless first, prompt for interactive on failure
 - `interactive_only` — skip Playwright, show manual checklist
 
-**VISUAL_PROOF.md:** Each test run appends an entry with datetime, plan/phase ID, surface type, commands run, pass/fail status, console errors, and artifact paths.
+**VISUAL_PROOF.md Entries:**
+- **Playwright step:** datetime, plan/phase ID, commands run, pass/fail, console errors, artifact paths
+- **Chrome step:** datetime, plan/phase ID, visual check result, screenshots taken, UX observations
+
+**Environment Variables:**
+- `FRONTEND_IMPACT=true` — Force chrome step (auto-detected from plan frontmatter)
+- `PLAN_ID=xx-yy` — Set plan ID for artifact organization
+- `PUSHPA_MODE=true` — Skip chrome step if no GUI available
 
 **Bootstrap only (no planning):**
 
@@ -644,8 +668,23 @@ skills:
 │   ├── pdf/
 │   ├── xlsx/
 │   └── ...
-└── community/                      # User-installed skills
-    └── (empty until /rrr:install-skill)
+└── community/                      # Community skill packs
+    ├── vercel/                     # Vercel agent skills (included in npm)
+    │   ├── vercel-react-best-practices/
+    │   └── web-design-guidelines/
+    └── droid-tings/                # AI/ML skills (vendor on demand)
+        └── (vendor with scripts/vendor-droid-tings-skills.sh)
+```
+
+**Vendoring Community Skills:**
+
+```bash
+# Vercel skills (small, included in npm package)
+bash scripts/vendor-vercel-skills.sh
+
+# droid-tings (large, not in npm - vendor on demand)
+bash scripts/vendor-droid-tings-skills.sh --list           # See available
+DROID_TINGS_ALLOWLIST="axolotl,unsloth" bash scripts/vendor-droid-tings-skills.sh
 ```
 
 ## Getting Help

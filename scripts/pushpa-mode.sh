@@ -739,26 +739,49 @@ run_visual_proof() {
     # ════════════════════════════════════════════════════════════════════
     # VERIFICATION LADDER IN PUSHPA MODE
     # ════════════════════════════════════════════════════════════════════
-    # Pushpa Mode runs the verification ladder WITHOUT chrome_visual_check:
+    # Pushpa Mode runs the verification ladder:
     #
-    # | Step               | Pushpa Mode |
-    # |--------------------|-------------|
-    # | unit_tests         | Yes         |
-    # | playwright         | Yes         |
-    # | chrome_visual_check| NEVER       |
+    # | Step               | Pushpa Mode                              |
+    # |--------------------|------------------------------------------|
+    # | unit_tests         | Yes                                      |
+    # | playwright         | Yes                                      |
+    # | chrome_visual_check| Only if GUI available AND frontend_impact|
     #
-    # Chrome visual check requires human interaction and is ALWAYS SKIPPED
-    # in Pushpa Mode. The PUSHPA_MODE env var tells scripts to skip it.
+    # Chrome visual check can run non-interactively in some environments.
+    # The visual-proof.sh script handles detection and skipping gracefully.
     # ════════════════════════════════════════════════════════════════════
-
-    # NEVER run chrome-visual-check.sh in Pushpa Mode
-    # It requires human interaction which is impossible in unattended runs
 
     # Check if visual-proof.sh exists
     if [ -f "scripts/visual-proof.sh" ]; then
-        bash scripts/visual-proof.sh --pushpa || {
+        # Determine if phase is frontend-impacting
+        # Check last executed plan's frontmatter for frontend_impact
+        local frontend_impact="false"
+        local last_plan=""
+        if [ -d "$PHASES_DIR" ]; then
+            last_plan=$(find "$PHASES_DIR" -name "*-PLAN.md" -type f 2>/dev/null | sort -r | head -1)
+            if [ -n "$last_plan" ] && [ -f "$last_plan" ]; then
+                if grep -q "frontend_impact: true" "$last_plan" 2>/dev/null; then
+                    frontend_impact="true"
+                fi
+            fi
+        fi
+
+        log INFO "Running visual proof (frontend_impact=$frontend_impact)..."
+
+        # Run visual proof with pushpa mode flag
+        # Pass FRONTEND_IMPACT so the script can decide on chrome step
+        FRONTEND_IMPACT="$frontend_impact" bash scripts/visual-proof.sh --pushpa || {
             log WARN "Visual proof failed (non-blocking in Pushpa Mode)"
         }
+
+        # If frontend-impacting and GUI available, also try chrome step
+        # The script handles skipping gracefully in CI/no-GUI environments
+        if [ "$frontend_impact" = "true" ]; then
+            log INFO "Frontend-impacting phase: attempting chrome visual check..."
+            FRONTEND_IMPACT="$frontend_impact" bash scripts/visual-proof.sh --pushpa --chrome || {
+                log WARN "Chrome visual check skipped or failed (non-blocking)"
+            }
+        fi
     elif [ -f "$(npm bin)/playwright" ] || command -v npx &>/dev/null; then
         # Fallback: run playwright directly
         if [ -d "e2e" ]; then

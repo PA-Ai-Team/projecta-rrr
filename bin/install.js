@@ -17,6 +17,40 @@ const reset = '\x1b[0m';
 const pkg = require('../package.json');
 
 /**
+ * Detect if running inside the projecta-rrr source repository root
+ * This prevents creating duplicate .claude/ when developing RRR itself
+ */
+function isRrrSourceRepo() {
+  const cwd = process.cwd();
+  const src = path.join(__dirname, '..');
+
+  // Check if cwd is the source repo root
+  if (path.resolve(cwd) !== path.resolve(src)) {
+    return false;
+  }
+
+  // Verify it's actually the RRR source repo by checking package.json name
+  // and presence of key source directories
+  try {
+    const cwdPkgPath = path.join(cwd, 'package.json');
+    if (!fs.existsSync(cwdPkgPath)) return false;
+
+    const cwdPkg = JSON.parse(fs.readFileSync(cwdPkgPath, 'utf8'));
+    if (cwdPkg.name !== 'projecta-rrr') return false;
+
+    // Check for source directories that only exist in the repo
+    const requiredDirs = ['rrr', 'commands', 'agents', 'bin'];
+    for (const dir of requiredDirs) {
+      if (!fs.existsSync(path.join(cwd, dir))) return false;
+    }
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
  * Render banner with TTY-aware formatting
  * - Boxed ASCII banner for TTY with sufficient width
  * - Plain text fallback for non-TTY or narrow terminals
@@ -329,9 +363,14 @@ function install(isGlobal) {
   // Priority: explicit --config-dir arg > CLAUDE_CONFIG_DIR env var > default ~/.claude
   const configDir = expandTilde(explicitConfigDir) || expandTilde(process.env.CLAUDE_CONFIG_DIR);
   const defaultGlobalDir = configDir || path.join(os.homedir(), '.claude');
+
+  // For local installs inside the RRR source repo, use .claude-local/ to avoid duplication
+  const isSourceRepo = !isGlobal && isRrrSourceRepo();
+  const localDirName = isSourceRepo ? '.claude-local' : '.claude';
+
   const claudeDir = isGlobal
     ? defaultGlobalDir
-    : path.join(process.cwd(), '.claude');
+    : path.join(process.cwd(), localDirName);
 
   const locationLabel = isGlobal
     ? claudeDir.replace(os.homedir(), '~')
@@ -341,7 +380,12 @@ function install(isGlobal) {
   // Use actual path when CLAUDE_CONFIG_DIR is set, otherwise use ~ shorthand
   const pathPrefix = isGlobal
     ? (configDir ? `${claudeDir}/` : '~/.claude/')
-    : './.claude/';
+    : `./${localDirName}/`;
+
+  // Warn if installing to .claude-local in source repo
+  if (isSourceRepo) {
+    console.log(`  ${yellow}Note:${reset} Detected RRR source repo, using ${cyan}.claude-local/${reset} to avoid duplication\n`);
+  }
 
   console.log(`  Installing to ${cyan}${locationLabel}${reset}\n`);
 
@@ -419,13 +463,13 @@ function install(isGlobal) {
   const settings = readSettings(settingsPath);
   const statuslineCommand = isGlobal
     ? '$HOME/.claude/hooks/statusline.sh'
-    : '.claude/hooks/statusline.sh';
+    : `${localDirName}/hooks/statusline.sh`;
   const updateCheckCommand = isGlobal
     ? '$HOME/.claude/hooks/rrr-check-update.sh'
-    : '.claude/hooks/rrr-check-update.sh';
+    : `${localDirName}/hooks/rrr-check-update.sh`;
   const notifyCommand = isGlobal
     ? '$HOME/.claude/hooks/rrr-notify.sh'
-    : '.claude/hooks/rrr-notify.sh';
+    : `${localDirName}/hooks/rrr-notify.sh`;
 
   // Configure SessionStart hook for update checking
   if (!settings.hooks) {
@@ -658,11 +702,12 @@ function promptLocation() {
   const configDir = expandTilde(explicitConfigDir) || expandTilde(process.env.CLAUDE_CONFIG_DIR);
   const globalPath = configDir || path.join(os.homedir(), '.claude');
   const globalLabel = globalPath.replace(os.homedir(), '~');
+  const localLabel = isRrrSourceRepo() ? './.claude-local' : './.claude';
 
   console.log(`  ${yellow}Where would you like to install?${reset}
 
   ${cyan}1${reset}) Global ${dim}(${globalLabel})${reset} - available in all projects
-  ${cyan}2${reset}) Local  ${dim}(./.claude)${reset} - this project only
+  ${cyan}2${reset}) Local  ${dim}(${localLabel})${reset} - this project only
 `);
 
   rl.question(`  Choice ${dim}[1]${reset}: `, (answer) => {

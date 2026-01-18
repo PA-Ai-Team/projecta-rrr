@@ -1,0 +1,32 @@
+# RRR NPM Ignore
+# Keep published package lean by excluding large community skill packs
+
+# Exclude large droid-tings pack (40+ MB) - users can vendor on demand
+rrr/skills/community/droid-tings
+rrr/skills/community/droid-tings/**
+
+# Local development files
+.planning/
+.claude/
+.claude-local/
+
+# Git and dev files
+.git/
+.github/
+.gitignore
+
+# Test files
+*.test.ts
+*.spec.ts
+__tests__/
+
+# Documentation that's not needed in package
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+
+# Dev notes
+TO-DOS.md
+CLAUDE.md
+
+# Research directories
+research.claude/

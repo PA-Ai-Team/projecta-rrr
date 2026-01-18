@@ -1,6 +1,6 @@
 {
   "name": "projecta-rrr",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code by Projecta.ai",
   "bin": {
     "projecta-rrr": "bin/install.js"
@@ -13,12 +13,20 @@
   "files": [
     "bin",
     "commands",
-    "rrr",
     "agents",
     "hooks",
     "scripts",
     "mcp.registry.json",
-    "projecta.defaults.json"
+    "projecta.defaults.json",
+    "rrr/lib",
+    "rrr/presets",
+    "rrr/references",
+    "rrr/templates",
+    "rrr/workflows",
+    "rrr/skills/projecta",
+    "rrr/skills/upstream",
+    "rrr/skills/community/README.md",
+    "rrr/skills/community/vercel"
   ],
   "keywords": [
     "claude",

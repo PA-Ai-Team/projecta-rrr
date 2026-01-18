@@ -397,10 +397,11 @@ skills_mode: normal         # "normal" (default) or "minimal" (skip default skil
 
 verification:
   surface: ui_affecting     # ui_affecting | backend_only (REQUIRED)
+  frontend_impact: true     # true | false (REQUIRED - enables two-step visual verification)
   required_steps:           # Steps executor MUST run (auto-derived from surface)
     - unit_tests
     - playwright
-    - chrome_visual_check
+    - chrome_visual_check   # Two-step: automated Playwright + claude --chrome
 
 must_haves:
   truths: []                # Observable behaviors
@@ -468,6 +469,7 @@ After completion, create `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
 | `user_setup` | No | Human-required setup items |
 | `skills` | No | Skills to load for execution (auto-inferred if empty) |
 | `skills_mode` | No | `normal` (default) or `minimal` (skip default skill) |
+| `verification.frontend_impact` | Yes | `true` enables two-step visual verification (Playwright + chrome) |
 | `must_haves` | Yes | Goal-backward verification criteria |
 
 **Wave is pre-computed:** Wave numbers are assigned during planning. Execute-phase reads `wave` directly from frontmatter and groups plans by wave number.
@@ -543,6 +545,17 @@ Every plan MUST include `verification:` frontmatter. The planner determines `sur
    - "frontend", "client-side", "browser", "user-facing"
    - "render", "display", "show", "visible"
 
+6. **Backend changes affecting FE integration**:
+   - API routes consumed by FE (app/api, pages/api)
+   - Contracts/DTOs used by FE
+   - Schema changes affecting UI types
+   - Auth/session flow changes
+   - CORS, cookies, redirects
+   - Webhooks displayed in UI
+   - Keywords: "integration", "wiring", "connect frontend", "hook up", "end-to-end"
+
+**Reference:** @~/.claude/rrr/references/frontend-impact-detection.md
+
 **BACKEND_ONLY** - plan has NO user-visible impact:
 
 1. **File path patterns** (ONLY these, no UI files):
@@ -568,6 +581,7 @@ Every plan MUST include `verification:` frontmatter. The planner determines `sur
 ```yaml
 verification:
   surface: ui_affecting
+  frontend_impact: true
   required_steps:
     - unit_tests
     - playwright
@@ -578,6 +592,7 @@ verification:
 ```yaml
 verification:
   surface: backend_only
+  frontend_impact: false
   required_steps:
     - unit_tests
 ```

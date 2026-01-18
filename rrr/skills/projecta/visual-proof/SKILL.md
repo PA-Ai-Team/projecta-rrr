@@ -1,28 +1,29 @@
 ---
 name: projecta.visual-proof
-description: Visual proof system for capturing UI verification artifacts
-tags: [testing, playwright, artifacts, screenshots, visual]
-max_lines: 150
+description: Visual proof system for capturing UI verification artifacts with mandatory two-step verification
+tags: [testing, playwright, chrome, artifacts, screenshots, visual, verification]
+max_lines: 250
 ---
 
 # Visual Proof System
 
 ## Verification Ladder
 
-This skill covers **step 2** of the verification ladder for UI_AFFECTING plans:
+This skill covers the **mandatory two-step verification** for FRONTEND_IMPACTING plans:
 
 ```
-1. unit_tests      → Fast, isolated logic checks
-2. playwright      → Automated UI tests (THIS SKILL)
-3. chrome_visual_check → Human-level verification (see projecta.chrome-visual-check)
+1. unit_tests           → Fast, isolated logic checks
+2. playwright           → Automated E2E tests (headless) ← Step 1
+3. chrome_visual_check  → Automated interactive verification (claude --chrome) ← Step 2
 ```
 
-For UI_AFFECTING plans: all 3 steps are MANDATORY (chrome skipped in Pushpa mode).
-For BACKEND_ONLY plans: only unit_tests runs.
+For `frontend_impact: true` plans: Steps 2 AND 3 are MANDATORY.
+For `frontend_impact: false` plans: Only unit_tests runs.
 
 ## When to Use
 
 Load this skill when:
+- Plan has `verification.frontend_impact: true`
 - Plan has `verification.surface: ui_affecting`
 - Verifying UI changes visually
 - Running post-execution validation
@@ -32,158 +33,196 @@ Load this skill when:
 
 ## Rules
 
+### Two-Step Verification (MANDATORY for frontend_impact: true)
+
+**Step 1: Playwright (automated headless)**
+- Run: `npx playwright test` or `bash scripts/visual-proof.sh`
+- Artifacts: `.planning/artifacts/playwright/`
+- Append entry to VISUAL_PROOF.md
+
+**Step 2: Chrome Visual Check (automated interactive)**
+- Run: `bash scripts/visual-proof.sh --chrome`
+- Uses `claude --chrome` for visual verification loop
+- Artifacts: `.planning/artifacts/chrome/`
+- Append SEPARATE entry to VISUAL_PROOF.md
+
+Both steps run even when Playwright passes - we want visual/UI confirmation.
+
 ### Artifact Storage (MANDATORY)
 
+**Playwright artifacts:**
+- Test results: `.planning/artifacts/playwright/test-results/`
+- HTML report: `.planning/artifacts/playwright/report/`
+- Screenshots (on failure): `.planning/artifacts/playwright/test-results/`
+- Traces (on failure): `.planning/artifacts/playwright/test-results/`
+- Videos (on failure): `.planning/artifacts/playwright/test-results/`
+
+**Chrome artifacts:**
+- Screenshots: `.planning/artifacts/chrome/screenshots/`
+- Logs: `.planning/artifacts/chrome/logs/`
+
 **MUST:**
-- Store ALL Playwright artifacts in `.planning/artifacts/playwright/`:
-  - Test results: `.planning/artifacts/playwright/test-results/`
-  - HTML report: `.planning/artifacts/playwright/report/`
-  - Screenshots (on failure): `.planning/artifacts/playwright/test-results/`
-  - Traces (on failure): `.planning/artifacts/playwright/test-results/`
-  - Videos (on failure): `.planning/artifacts/playwright/test-results/`
 - Log EVERY run to `.planning/VISUAL_PROOF.md` (append-only)
 - Capture screenshots on ANY test failure
 - Enable trace recording for debugging failures
+- Run BOTH steps for frontend_impact: true plans
 
 **MUST NOT:**
 - Delete existing VISUAL_PROOF.md entries
 - Store artifacts outside `.planning/artifacts/`
 - Skip visual proof after phase execution
-- Overwrite previous run artifacts without archiving
+- Skip chrome step when frontend_impact: true (unless no GUI available)
 
-### Interactive Verification (UX-Sensitive Plans)
+### Human Checkpoints (Key Milestones Only)
 
-**When to recommend interactive verification:**
-- Plan has `checkpoint:human-verify` task type
-- Plan mentions UX-sensitive keywords: flow, animation, transition, hover, responsive, accessibility
-- User explicitly requests visual review
-- Previous automated tests failed with UI-related errors
+Human verification checkpoints apply for:
+- Phase completion (`checkpoint:human-verify` at phase end)
+- Plans tagged `milestone: true`
+- Plans with auth/payment/onboarding flows
 
-**Interactive verification options (in order of preference):**
-
-1. **Playwright UI mode** (preferred for exploratory testing):
-   ```bash
-   npx playwright test --ui
-   ```
-   Opens interactive test runner with visual inspection.
-
-2. **Headed mode** (see tests execute):
-   ```bash
-   npx playwright test --headed
-   ```
-
-3. **Claude chrome browser** (optional for deep UX exploration):
-   ```bash
-   claude --chrome
-   ```
-   Use for conversational UX verification when automated tests pass but human judgment needed.
-
-### Running Visual Proof
-
-After implementation tasks complete (BEFORE writing SUMMARY.md):
-
-1. Check for `e2e/*.spec.ts` files
-2. Run unit tests if they exist: `npm run test:unit` or `npm test`
-3. Run e2e tests: `npx playwright test`
-4. Confirm artifact locations exist:
-   - `.planning/artifacts/playwright/test-results/`
-   - `.planning/artifacts/playwright/report/`
-5. Append run record to `.planning/VISUAL_PROOF.md`
-6. If failures occurred, ensure screenshots/traces/videos captured
-
-**Always append to VISUAL_PROOF.md** after running tests, regardless of pass/fail.
+For these, add human verification checklist after automated steps complete.
 
 ## Commands
 
 ```bash
-# Run visual proof (full suite)
+# Run full visual proof (Playwright only)
 bash scripts/visual-proof.sh
 
-# Run Playwright tests
-npm run e2e                    # Headless
+# Run with chrome step (REQUIRED for frontend_impact: true)
+bash scripts/visual-proof.sh --chrome
+
+# Pushpa mode (no interactive prompts)
+bash scripts/visual-proof.sh --pushpa
+bash scripts/visual-proof.sh --pushpa --chrome
+
+# Individual commands
+npm run e2e                    # Headless Playwright
 npm run e2e:headed             # With browser visible
 npm run e2e:ui                 # Interactive UI mode
 
 # Open HTML report
 npm run visual:open
-# or
 npx playwright show-report .planning/artifacts/playwright/report
-
-# Run specific test file
-npx playwright test e2e/auth.spec.ts
-
-# Debug a failing test
-npx playwright test --debug e2e/auth.spec.ts
 ```
 
 ## Environment Variables
 
 ```bash
+# Frontend impact detection (set by executor)
+FRONTEND_IMPACT=true           # Enables chrome step automatically
+
 # Visual proof configuration
-VISUAL_PROOF_MODE=playwright     # playwright | playwright_headed | hybrid
+VISUAL_PROOF_MODE=playwright   # playwright | playwright_headed | hybrid
 PLAYWRIGHT_OUTPUT_DIR=.planning/artifacts/playwright
+```
+
+## VISUAL_PROOF.md Entry Format (MANDATORY)
+
+After EVERY test run, append an entry. Separate entries for Playwright and Chrome steps:
+
+### Playwright Entry
+
+```markdown
+## Run: {YYYYMMDD_HHMMSS}
+
+- **Timestamp:** {ISO-8601 datetime}
+- **Plan ID:** {phase}-{plan} (or "manual run")
+- **Frontend Impact:** true | false
+- **Step:** playwright (automated)
+
+### Commands Run
+- `npm test` — {pass/fail/skipped}
+- `npx playwright test` — {pass/fail/skipped}
+
+### Result
+**Status:** PASS | FAIL
+**Exit Code:** {0 or non-zero}
+
+### Artifacts
+- Report: `.planning/artifacts/playwright/report/index.html`
+- Test Results: `.planning/artifacts/playwright/test-results/`
+
+### Console/Page/Network Errors
+{List any errors observed, or "None"}
+
+---
+```
+
+### Chrome Entry
+
+```markdown
+## Run: {YYYYMMDD_HHMMSS}
+
+- **Timestamp:** {ISO-8601 datetime}
+- **Plan ID:** {phase}-{plan}
+- **Frontend Impact:** true
+- **Step:** chrome_visual_check (automated interactive)
+
+### Commands Run
+- `claude --chrome` verification loop
+
+### Result
+**Status:** PASS | FAIL | SKIPPED (no GUI)
+
+### Visual Confirmations
+- {What was visually confirmed - short bullets}
+- {e.g., "Login form renders correctly"}
+- {e.g., "Dashboard charts load with data"}
+
+### Artifacts
+- Screenshots: `.planning/artifacts/chrome/screenshots/`
+- Logs: `.planning/artifacts/chrome/logs/`
+
+### Console/Page/Network Errors
+{List any errors observed during chrome check, or "None"}
+
+---
+```
+
+### Skipped Chrome Entry (No GUI)
+
+```markdown
+## Run: {YYYYMMDD_HHMMSS}
+
+- **Timestamp:** {ISO-8601 datetime}
+- **Plan ID:** {phase}-{plan}
+- **Frontend Impact:** true
+- **Step:** chrome_visual_check
+
+### Result
+**Status:** SKIPPED (no GUI available)
+
+### Manual Command
+Run locally with GUI:
+\`\`\`bash
+bash scripts/visual-proof.sh --chrome
+\`\`\`
+
+---
 ```
 
 ## Artifacts Directory Structure
 
 ```
 .planning/
-├── VISUAL_PROOF.md              # Append-only run log (NEVER delete entries)
+├── VISUAL_PROOF.md              # Append-only verification log (NEVER delete entries)
 └── artifacts/
-    └── playwright/
-        ├── report/              # HTML report (index.html)
-        │   └── index.html
-        └── test-results/        # Per-test artifacts
-            ├── auth-login/
-            │   ├── screenshot.png    # Captured on failure
-            │   ├── trace.zip         # Recorded trace
-            │   └── video.webm        # Recorded video
-            └── dashboard-view/
-                └── screenshot.png
+    ├── playwright/
+    │   ├── report/              # HTML report (index.html)
+    │   │   └── index.html
+    │   └── test-results/        # Per-test artifacts
+    │       ├── auth-login/
+    │       │   ├── screenshot.png
+    │       │   ├── trace.zip
+    │       │   └── video.webm
+    │       └── dashboard-view/
+    │           └── screenshot.png
+    └── chrome/
+        ├── screenshots/         # Claude chrome visual captures
+        │   └── {timestamp}-{description}.png
+        └── logs/
+            └── chrome-check-{timestamp}.log
 ```
-
-## VISUAL_PROOF.md Entry Format (MANDATORY)
-
-After EVERY test run, append an entry with this format:
-
-```markdown
-## Run: {ISO-8601 datetime}
-
-**Plan:** {phase}-{plan} (or "manual run")
-**Surface:** {ui_affecting | backend_only}
-**Commands:**
-- `npm test` — {pass/fail or "skipped"}
-- `npx playwright test` — {pass/fail or "skipped" or "n/a (backend_only)"}
-- `chrome_visual_check` — {pass/fail or "skipped (Pushpa)" or "n/a (backend_only)"}
-
-**Result:** {PASS|FAIL} ({passed}/{total} steps)
-
-### Test Summary
-| Test | Status | Duration |
-|------|--------|----------|
-| auth.spec.ts | PASS | 2.3s |
-| dashboard.spec.ts | FAIL | 3.1s |
-
-### Console Errors
-{List any console errors observed, or "None"}
-
-### Artifact Paths
-- Report: `.planning/artifacts/playwright/report/index.html`
-- Failures: `.planning/artifacts/playwright/test-results/`
-
----
-```
-
-## UX Telemetry
-
-Visual proof captures:
-- Console errors (`console.error`)
-- Page errors (uncaught exceptions)
-- Network failures (4xx/5xx responses)
-- Slow requests (>3s)
-
-**Visual proof failure does NOT block phase completion** — logged as warning only.
-However, failures MUST be recorded in VISUAL_PROOF.md for tracking.
 
 ## Playwright Configuration
 
@@ -203,3 +242,14 @@ export default defineConfig({
   },
 });
 ```
+
+## UX Telemetry
+
+Visual proof captures:
+- Console errors (`console.error`)
+- Page errors (uncaught exceptions)
+- Network failures (4xx/5xx responses)
+- Slow requests (>3s)
+
+**Visual proof failure does NOT block phase completion** — logged as warning only.
+However, failures MUST be recorded in VISUAL_PROOF.md for tracking.

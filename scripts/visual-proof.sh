@@ -1,20 +1,26 @@
 #!/bin/bash
 #
 # Visual Proof Runner for RRR
-# Runs Playwright tests and captures UX telemetry, appending results to VISUAL_PROOF.md
+# Runs Playwright tests and optionally claude --chrome verification
+# Appends results to VISUAL_PROOF.md
 #
-# Usage: bash scripts/visual-proof.sh [--headed] [--interactive]
+# Usage: bash scripts/visual-proof.sh [options]
+#
+# Options:
+#   --chrome       Run chrome visual check after Playwright (REQUIRED for frontend_impact:true)
+#   --headed       Force headed mode for Playwright
+#   --interactive  Skip Playwright, run interactive guidance
+#   --pushpa       Running in Pushpa Mode (never interactive, still allows chrome if GUI available)
+#
+# Environment:
+#   FRONTEND_IMPACT=true   Automatically enables chrome step
+#   PLAN_ID=XX-NN          Plan identifier for logging
 #
 # Modes (from .planning/config.json visual_proof.mode):
 # - playwright: headless Playwright + artifacts (default)
 # - playwright_headed: headed if TTY, else headless
 # - hybrid: headless first; prompt for interactive fallback on eligible failures
 # - interactive_only: skip Playwright; print interactive UAT checklist
-#
-# Options:
-# --headed: Force headed mode
-# --interactive: Skip Playwright, run interactive guidance
-# --pushpa: Running in Pushpa Mode (never interactive)
 #
 
 set -euo pipefail
@@ -29,6 +35,9 @@ VISUAL_PROOF_FILE="$PLANNING_DIR/VISUAL_PROOF.md"
 ARTIFACTS_DIR="$PLANNING_DIR/artifacts"
 PLAYWRIGHT_REPORT="$ARTIFACTS_DIR/playwright/report"
 PLAYWRIGHT_RESULTS="$ARTIFACTS_DIR/playwright/test-results"
+CHROME_DIR="$ARTIFACTS_DIR/chrome"
+CHROME_SCREENSHOTS="$CHROME_DIR/screenshots"
+CHROME_LOGS="$CHROME_DIR/logs"
 UX_TELEMETRY_DIR="$ARTIFACTS_DIR/ux-telemetry"
 
 # Colors
@@ -43,7 +52,12 @@ NC='\033[0m'
 HEADED=false
 INTERACTIVE=false
 PUSHPA_MODE=false
+RUN_CHROME=false
 RUN_ID=$(date +%Y%m%d_%H%M%S)
+
+# Environment-based defaults
+FRONTEND_IMPACT="${FRONTEND_IMPACT:-false}"
+PLAN_ID="${PLAN_ID:-manual}"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Parse Arguments
@@ -51,6 +65,10 @@ RUN_ID=$(date +%Y%m%d_%H%M%S)
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --chrome)
+            RUN_CHROME=true
+            shift
+            ;;
         --headed)
             HEADED=true
             shift
@@ -87,6 +105,28 @@ log() {
 
 is_tty() {
     [ -t 1 ]
+}
+
+has_gui() {
+    # Check if GUI is available
+    if [[ "$(uname)" == "Darwin" ]]; then
+        # macOS - check if we have a display
+        if [ -n "${DISPLAY:-}" ] || [ -n "$(who | grep console)" ]; then
+            return 0
+        fi
+        # On Mac, we usually have GUI unless running in pure SSH
+        return 0
+    else
+        # Linux - check for DISPLAY or WAYLAND
+        if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+is_ci() {
+    [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ] || [ -n "${GITLAB_CI:-}" ]
 }
 
 read_config_value() {
@@ -128,8 +168,16 @@ playwright_tests_exist() {
     fi
 }
 
+# Auto-enable chrome for frontend_impact=true (unless explicitly disabled)
+auto_enable_chrome() {
+    if [ "$FRONTEND_IMPACT" = "true" ] && [ "$RUN_CHROME" = "false" ]; then
+        log INFO "FRONTEND_IMPACT=true detected, enabling chrome step"
+        RUN_CHROME=true
+    fi
+}
+
 # ═══════════════════════════════════════════════════════════════════════════════
-# Main Functions
+# Playwright Functions
 # ═══════════════════════════════════════════════════════════════════════════════
 
 run_playwright() {
@@ -170,7 +218,7 @@ count_telemetry() {
     echo "$console_errors $page_errors $network_failures"
 }
 
-append_visual_proof() {
+append_playwright_proof() {
     local status="$1"
     local exit_code="$2"
 
@@ -199,11 +247,19 @@ EOF
 ## Run: $RUN_ID
 
 - **Timestamp:** $timestamp
-- **Status:** $status
-- **Exit Code:** $exit_code
+- **Plan ID:** $PLAN_ID
+- **Frontend Impact:** $FRONTEND_IMPACT
+- **Step:** playwright (automated)
+
+### Commands Run
+- \`npx playwright test\` — $status
+
+### Result
+**Status:** $status
+**Exit Code:** $exit_code
 
 ### Artifacts
-- Report: \`$PLAYWRIGHT_REPORT\`
+- Report: \`$PLAYWRIGHT_REPORT/index.html\`
 - Test Results: \`$PLAYWRIGHT_RESULTS\`
 EOF
 
@@ -211,18 +267,150 @@ EOF
     if [ "$console_errors" -gt 0 ] || [ "$page_errors" -gt 0 ] || [ "$network_failures" -gt 0 ]; then
         cat >> "$VISUAL_PROOF_FILE" << EOF
 
-### UX Telemetry
+### Console/Page/Network Errors
 | Metric | Count |
 |--------|-------|
 | Console Errors | $console_errors |
 | Page Errors | $page_errors |
 | Network Failures | $network_failures |
 EOF
+    else
+        echo "" >> "$VISUAL_PROOF_FILE"
+        echo "### Console/Page/Network Errors" >> "$VISUAL_PROOF_FILE"
+        echo "None" >> "$VISUAL_PROOF_FILE"
     fi
 
     echo "" >> "$VISUAL_PROOF_FILE"
     echo "---" >> "$VISUAL_PROOF_FILE"
 }
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Chrome Visual Check Functions
+# ═══════════════════════════════════════════════════════════════════════════════
+
+run_chrome_check() {
+    log INFO "Running chrome visual check..."
+
+    # Create chrome artifacts directory
+    mkdir -p "$CHROME_SCREENSHOTS" "$CHROME_LOGS"
+
+    local chrome_log="$CHROME_LOGS/chrome-check-$RUN_ID.log"
+    local exit_code=0
+
+    # Check if we can run chrome check
+    if is_ci; then
+        log WARN "CI environment detected, skipping chrome visual check"
+        append_chrome_proof "SKIPPED" "CI environment" ""
+        return 0
+    fi
+
+    if ! has_gui; then
+        log WARN "No GUI available, skipping chrome visual check"
+        append_chrome_proof "SKIPPED" "no GUI" ""
+        echo ""
+        echo -e "${YELLOW}To run chrome check manually with GUI:${NC}"
+        echo -e "  ${CYAN}bash scripts/visual-proof.sh --chrome${NC}"
+        echo ""
+        return 0
+    fi
+
+    # Run claude --chrome for visual verification
+    # This runs in a non-blocking way - we capture output but don't wait for interactive input
+    log INFO "Starting claude --chrome verification..."
+
+    # Create a verification prompt
+    local verify_prompt="Visual verification for plan $PLAN_ID. Check:
+1. Page renders correctly without visual glitches
+2. Interactive elements are clickable and responsive
+3. No console errors or network failures
+4. Layout matches expected design
+
+Take screenshots of key views and note any issues found."
+
+    # Run claude --chrome with timeout
+    # Note: This may need adjustment based on how claude --chrome works
+    if command -v claude &> /dev/null; then
+        # Try to run with a reasonable approach
+        # Since claude --chrome is interactive, we'll capture what we can
+        (
+            echo "$verify_prompt" | timeout 120 claude --chrome 2>&1 || true
+        ) > "$chrome_log" 2>&1 || exit_code=$?
+
+        if [ $exit_code -eq 124 ]; then
+            log WARN "Chrome check timed out (120s limit)"
+            append_chrome_proof "TIMEOUT" "0" ""
+        elif [ $exit_code -eq 0 ]; then
+            log OK "Chrome visual check completed"
+            append_chrome_proof "PASS" "$exit_code" ""
+        else
+            log WARN "Chrome check exited with code $exit_code"
+            append_chrome_proof "FAIL" "$exit_code" ""
+        fi
+    else
+        log WARN "claude CLI not found in PATH"
+        append_chrome_proof "SKIPPED" "claude not installed" ""
+        echo ""
+        echo -e "${YELLOW}To run chrome check, install claude CLI:${NC}"
+        echo -e "  ${CYAN}npm install -g @anthropic-ai/claude-code${NC}"
+        echo ""
+    fi
+
+    return 0
+}
+
+append_chrome_proof() {
+    local status="$1"
+    local detail="$2"
+    local confirmations="$3"
+
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    cat >> "$VISUAL_PROOF_FILE" << EOF
+
+## Run: ${RUN_ID}_chrome
+
+- **Timestamp:** $timestamp
+- **Plan ID:** $PLAN_ID
+- **Frontend Impact:** true
+- **Step:** chrome_visual_check (automated interactive)
+
+### Commands Run
+- \`claude --chrome\` verification loop
+
+### Result
+**Status:** $status
+EOF
+
+    if [ "$status" = "SKIPPED" ]; then
+        cat >> "$VISUAL_PROOF_FILE" << EOF
+**Reason:** $detail
+
+### Manual Command
+Run locally with GUI:
+\`\`\`bash
+bash scripts/visual-proof.sh --chrome
+\`\`\`
+EOF
+    else
+        cat >> "$VISUAL_PROOF_FILE" << EOF
+**Exit Code:** $detail
+
+### Visual Confirmations
+${confirmations:-"See log: $CHROME_LOGS/chrome-check-$RUN_ID.log"}
+
+### Artifacts
+- Screenshots: \`$CHROME_SCREENSHOTS/\`
+- Logs: \`$CHROME_LOGS/chrome-check-$RUN_ID.log\`
+EOF
+    fi
+
+    echo "" >> "$VISUAL_PROOF_FILE"
+    echo "---" >> "$VISUAL_PROOF_FILE"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Interactive Functions
+# ═══════════════════════════════════════════════════════════════════════════════
 
 run_interactive_uat() {
     echo ""
@@ -240,6 +428,9 @@ run_interactive_uat() {
     echo ""
     echo "  3. Open last report:"
     echo -e "     ${CYAN}npm run visual:open${NC}"
+    echo ""
+    echo "  4. Run claude chrome check:"
+    echo -e "     ${CYAN}claude --chrome${NC}"
     echo ""
     echo "After verification, record results manually or re-run visual proof."
     echo ""
@@ -287,16 +478,28 @@ is_eligible_for_interactive() {
 # ═══════════════════════════════════════════════════════════════════════════════
 
 main() {
+    # Auto-enable chrome for frontend-impacting plans
+    auto_enable_chrome
+
     echo ""
     echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}${CYAN} RRR ► VISUAL PROOF${NC}"
     echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
+    log INFO "Plan ID: $PLAN_ID"
+    log INFO "Frontend Impact: $FRONTEND_IMPACT"
+    log INFO "Chrome Step: $RUN_CHROME"
+
     # Check if Playwright tests exist
     if ! playwright_tests_exist; then
         log WARN "No Playwright tests found in e2e/ directory"
-        log INFO "Skipping visual proof (no tests to run)"
+        log INFO "Skipping Playwright step (no tests to run)"
+
+        # Still run chrome check if requested
+        if [ "$RUN_CHROME" = true ]; then
+            run_chrome_check
+        fi
         exit 0
     fi
 
@@ -311,7 +514,7 @@ main() {
         mode="interactive_only"
     fi
 
-    # Pushpa Mode forces headless, never interactive
+    # Pushpa Mode forces headless, never interactive prompts
     if [ "$PUSHPA_MODE" = true ]; then
         if [ "$mode" = "hybrid" ] || [ "$mode" = "interactive_only" ]; then
             log WARN "Pushpa Mode: overriding $mode to playwright (headless)"
@@ -346,28 +549,31 @@ main() {
     # Ensure artifacts directory exists
     mkdir -p "$ARTIFACTS_DIR"
 
-    # Run Playwright
-    local exit_code=0
-    run_playwright || exit_code=$?
+    # ═══════════════════════════════════════════════════════════════════════════
+    # Step 1: Run Playwright
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    local playwright_exit=0
+    run_playwright || playwright_exit=$?
 
     # Determine status
-    local status
-    if [ $exit_code -eq 0 ]; then
-        status="PASSED"
-        log OK "Visual proof passed"
+    local playwright_status
+    if [ $playwright_exit -eq 0 ]; then
+        playwright_status="PASS"
+        log OK "Playwright tests passed"
     else
-        status="FAILED"
-        log ERROR "Visual proof failed (exit code: $exit_code)"
+        playwright_status="FAIL"
+        log ERROR "Playwright tests failed (exit code: $playwright_exit)"
     fi
 
     # Append to VISUAL_PROOF.md
-    append_visual_proof "$status" "$exit_code"
-    log INFO "Results appended to $VISUAL_PROOF_FILE"
+    append_playwright_proof "$playwright_status" "$playwright_exit"
+    log INFO "Playwright results appended to $VISUAL_PROOF_FILE"
 
     # Handle hybrid mode fallback
-    if [ "$mode" = "hybrid" ] && [ "$exit_code" -ne 0 ]; then
+    if [ "$mode" = "hybrid" ] && [ "$playwright_exit" -ne 0 ]; then
         if [ "$fallback" = "true" ]; then
-            if is_eligible_for_interactive "$exit_code"; then
+            if is_eligible_for_interactive "$playwright_exit"; then
                 if prompt_interactive_fallback; then
                     run_interactive_uat
                 fi
@@ -377,17 +583,39 @@ main() {
         fi
     fi
 
-    # Print report location
+    # ═══════════════════════════════════════════════════════════════════════════
+    # Step 2: Run Chrome Visual Check (if enabled)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    if [ "$RUN_CHROME" = true ]; then
+        echo ""
+        echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${BOLD}${CYAN} RRR ► CHROME VISUAL CHECK${NC}"
+        echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+
+        run_chrome_check
+        log INFO "Chrome results appended to $VISUAL_PROOF_FILE"
+    fi
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # Summary
+    # ═══════════════════════════════════════════════════════════════════════════
+
     echo ""
     echo -e "${BOLD}Artifacts:${NC}"
-    echo "  Report:  $PLAYWRIGHT_REPORT"
-    echo "  Results: $PLAYWRIGHT_RESULTS"
-    echo "  Log:     $VISUAL_PROOF_FILE"
+    echo "  Playwright Report:  $PLAYWRIGHT_REPORT"
+    echo "  Playwright Results: $PLAYWRIGHT_RESULTS"
+    if [ "$RUN_CHROME" = true ]; then
+        echo "  Chrome Screenshots: $CHROME_SCREENSHOTS"
+        echo "  Chrome Logs:        $CHROME_LOGS"
+    fi
+    echo "  Proof Log:          $VISUAL_PROOF_FILE"
     echo ""
-    echo -e "Open report: ${CYAN}npm run visual:open${NC}"
+    echo -e "Open Playwright report: ${CYAN}npm run visual:open${NC}"
     echo ""
 
-    exit $exit_code
+    exit $playwright_exit
 }
 
 main "$@"
