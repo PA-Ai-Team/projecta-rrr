@@ -383,6 +383,31 @@ Pushpa Mode will skip these phases and record them in the report for manual foll
 - Running inside Claude Code works but can trigger approval prompts ("Do you want to proceed?").
 - The script detects if it's running inside Claude Code and prompts: `Continue running Pushpa Mode inside Claude Code? (y/N)` — default is **No**. Press Enter to exit with instructions to run externally.
 
+### Verification Ladder
+
+RRR uses a deterministic verification ladder that triggers based on what the plan affects:
+
+**Plan Classification:**
+- **UI_AFFECTING** — plans touching frontend files, UI keywords, API routes used by UI
+- **BACKEND_ONLY** — plans with no user-visible impact (scripts, migrations, pure utilities)
+
+**Verification by Surface:**
+
+| Surface | unit_tests | playwright | chrome_visual_check |
+|---------|------------|------------|---------------------|
+| ui_affecting | Yes | Yes | Yes (skip in Pushpa) |
+| backend_only | Yes | No | No |
+
+The planner automatically classifies plans and adds `verification:` frontmatter:
+```yaml
+verification:
+  surface: ui_affecting
+  required_steps:
+    - unit_tests
+    - playwright
+    - chrome_visual_check
+```
+
 ### Visual Proof (Automated UX Verification)
 
 RRR includes automated visual proof via Playwright tests and UX telemetry capture.
@@ -424,23 +449,24 @@ npm run e2e:headed       # Run with browser visible
 npm run e2e:ui           # Playwright UI mode (interactive)
 npm run visual:open      # Open last HTML report
 bash scripts/visual-proof.sh  # Full visual proof runner
+bash scripts/chrome-visual-check.sh  # Interactive Chrome verification
 ```
 
-**Interactive verification (optional):**
+**Interactive verification (UI_AFFECTING plans only):**
 ```bash
 npx playwright test --ui     # Playwright UI mode for exploratory testing
 npx playwright test --headed # See tests execute in browser
-claude --chrome              # Deep UX exploration with Claude
+bash scripts/chrome-visual-check.sh  # Claude Chrome for human-level verification
 ```
 
 **Integration:**
 - Runs automatically after `/rrr:execute-phase` (if e2e tests exist)
 - Runs automatically after `/rrr:execute-plan` (if tests exist)
-- Runs in Pushpa Mode (headless only, never interactive)
+- Runs in Pushpa Mode (headless Playwright only, chrome visual check skipped)
 - Results logged to `.planning/VISUAL_PROOF.md` (append-only)
 
 **VISUAL_PROOF.md format:**
-Each run appends an entry with datetime, plan/phase ID, commands run, pass/fail status, console errors, and artifact paths.
+Each run appends an entry with datetime, plan/phase ID, surface type, commands run, pass/fail status, console errors, and artifact paths.
 
 **UX Telemetry Fixture:**
 
@@ -756,6 +782,24 @@ Install skills from GitHub or skillsmp.com:
 ```
 
 Community skills install to `.claude/skills/community/`.
+
+### Vendoring Skills (Maintainers)
+
+RRR uses two vendoring scripts to pull skills from external repositories into the `rrr/skills/` directory:
+
+**Anthropic upstream skills** (`scripts/vendor-skills.sh`):
+Vendors official Anthropic skills into `rrr/skills/upstream/anthropic/`. Run by maintainers to update the bundled Anthropic skill set.
+
+**Community skill packs** (`scripts/vendor-community-skills.sh`):
+Vendors community skill packs into `rrr/skills/community/<pack-name>/`. By default, pulls from [ovachiever/droid-tings](https://github.com/ovachiever/droid-tings). This script is idempotent and only touches its target directory — it never modifies `upstream/` or `projecta/` folders.
+
+```bash
+# Vendor Anthropic skills (maintainer use)
+bash scripts/vendor-skills.sh
+
+# Vendor community skills (droid-tings pack)
+bash scripts/vendor-community-skills.sh
+```
 
 ---
 
