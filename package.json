@@ -1,6 +1,6 @@
 {
   "name": "projecta-rrr",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code by Projecta.ai",
   "bin": {
     "projecta-rrr": "bin/install.js"
