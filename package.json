@@ -7,7 +7,8 @@
   },
   "scripts": {
     "mcp:setup": "bash scripts/mcp-setup.sh",
-    "pushpa": "bash scripts/pushpa-mode.sh"
+    "pushpa": "bash scripts/pushpa-mode.sh",
+    "visual:proof": "bash scripts/visual-proof.sh"
   },
   "files": [
     "bin",
